@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "heapsort.h"
+#include "../src/heapsort.h"
 
 //#define LENGTH 15
 #define LENGTH 2

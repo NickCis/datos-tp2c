@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-#include "archivo_bloque.h"
+#include "../src/archivo_registro.h"
 
-#define TEST_PATH "archivo__test.dat"
+#define TEST_PATH "archivo_registro_test.dat"
 #define TEST_STRING_LENGTH 20
 char* strings[] = {
 	"1- hola como te va",
@@ -28,8 +28,6 @@ char* strings[] = {
 	"8 - otras cosas "
 };
 
-#define BLOQUE_SIZE (512)
-
 typedef enum MODE {
 	READ=0,
 	WRITE
@@ -37,40 +35,36 @@ typedef enum MODE {
 
 int main(int argc, char* argv[]){
 	MODE mode = WRITE;
-	TArchivo* arch;
+	TArchivoReg* arch;
 	if(argc >= 2){
 		if(!strcmp(argv[1], "-r"))
 			mode = READ;
 	}
 
-	arch = Archivo_crear(TEST_PATH, BLOQUE_SIZE);
+	arch = ArchivoReg_crear(TEST_PATH);
 
 	switch(mode){
 		case READ:{
-			Archivo_bloque_leer(arch);
 			uint8_t *buf;
 			size_t size;
-			while((buf = Archivo_get_buf(arch, &size))){
+			while((buf = ArchivoReg_leer(arch, &size))){
 				printf("%u '%s'\n", size, (char*) buf);
 				free(buf);
 			}
 			break;
 		}
 
-
 		default:{
 			printf("Escribiendo\n");
 			int i = 0;
 			for(i=0;i<TEST_STRING_LENGTH; i++){
-				if(! Archivo_agregar_buf(arch, (uint8_t*) strings[i], strlen(strings[i])+1))
+				if( ArchivoReg_escribir(arch, (uint8_t*) strings[i], strlen(strings[i])+1) == 0)
 					printf("%d Pude agregar\n", i);
 			}
-			Archivo_flush(arch);
 			break;
 		}
-
 	}
 
-	Archivo_destruir(arch);
+	ArchivoReg_destruir(arch);
 	return 0;
 }

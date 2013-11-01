@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "ordenador.h"
+#include "../src/ordenador.h"
 
 //typedef struct TOrdenador TOrdenador;
 //TOrdenador* Ordenador_crear(TSortFunction func);

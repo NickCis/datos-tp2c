@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "bloque.h"
+#include "../src/bloque.h"
 
 #define TEST_STRING_LENGTH 3
 char* strings[] = {
