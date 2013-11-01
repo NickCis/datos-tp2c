@@ -59,6 +59,17 @@ int Bloque_libre(TBloque* this, size_t size){
 
 	return 0;
 }
+
+int Bloque_lleno(TBloque* this){
+	if(!this)
+		return 0;
+
+	size_t max_size = BLOQUE_PORCENTAGE * this->size / 100;
+	if(this->bloque->size_write >= max_size)
+		return 1;
+	return 0;
+}
+
 int Bloque_agregar_buf(TBloque* this, uint8_t* buff, size_t size){
 	if(!this)
 		return 1;

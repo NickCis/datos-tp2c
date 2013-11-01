@@ -6,14 +6,42 @@
 struct TArchivo {
 	size_t size_bloque;
 	size_t cant_bloque;
+	size_t cur_bloque; // -> Va a indicar el numero de bloque en donde esta parado fd en el archivo
 	int reg_in_bloque;
 	FILE* fd;
 	TBloque *bloque;
 	long size_file, file_pos;
 	char* path;
+	char* path_adm;
+	uint8_t* mapa_bits;
+	size_t mapa_bits_size;
 };
 
+/** Escribe el flag de control de memoria del bloque actual
+ * funcion de uso interno.
+ */
+void escribir_info_mapa(TArchivo* this){
+	if(this->mapa_bits){
+		size_t pos = this->cur_bloque / 8;
+		if(pos >= this->mapa_bits_size){
+			//this->mapa_bits_size++;
+			this->mapa_bits_size = pos+1;
+			this->mapa_bits = (uint8_t*) realloc(this->mapa_bits, this->mapa_bits_size);
+		}
+
+		//printf("bloque: '%d' mapa de bits pos: '%d' offset: '%d' bloque lleno: '%d' \n", this->cur_bloque, pos, (this->cur_bloque % 8), (Bloque_lleno(this->bloque)));
+
+		int flag = (Bloque_lleno(this->bloque)) << (this->cur_bloque % 8);
+		flag |= this->mapa_bits[pos];
+		this->mapa_bits[pos] = flag;
+	}
+}
+
 TArchivo* Archivo_crear(char *path, size_t size){
+	return Archivo_crear_adm(path, NULL, size);
+}
+
+TArchivo* Archivo_crear_adm(char *path, char *path_adm , size_t size){
 	TArchivo* this = (TArchivo*) calloc(1, sizeof(TArchivo));
 
 	this->size_bloque = size;
@@ -40,6 +68,23 @@ TArchivo* Archivo_crear(char *path, size_t size){
 	
 	this->bloque = Bloque_crear(this->size_bloque);
 
+	if(path_adm){
+		this->path_adm = (char*) calloc(strlen(path_adm) +1, sizeof(char));
+		strcpy(this->path_adm, path_adm);
+		this->mapa_bits_size = this->cant_bloque / 8;
+		if(this->cant_bloque % 8)
+			this->mapa_bits_size++;
+
+		this->mapa_bits = (uint8_t*) calloc(1, this->mapa_bits_size);
+
+		FILE* fd_mapa;
+		if( (fd_mapa = fopen(path_adm, "r+b"))){//Abrio el archivo
+			fread((void*) this->mapa_bits, 1, this->mapa_bits_size, fd_mapa);
+			fclose(fd_mapa);
+		}
+
+	}
+
 	return this;
 }
 
@@ -47,6 +92,28 @@ TArchivo* Archivo_crear(char *path, size_t size){
 int Archivo_bloque_seek(TArchivo* this, unsigned int n, int whence){
 	if(!this)
 		return 1;
+
+	switch(whence){
+		case SEEK_SET:
+			this->cur_bloque = n;
+			break;
+
+		case SEEK_CUR:
+			this->cur_bloque += n;
+			break;
+
+		case SEEK_END:
+			this->cur_bloque = this->cant_bloque - n;
+			break;
+
+		default:
+			break;
+	}
+
+	if(this->bloque)
+		Bloque_destruir(this->bloque);
+
+	this->bloque = Bloque_crear(this->size_bloque);
 
 	return fseek(this->fd, this->size_bloque * n, whence);
 }
@@ -59,6 +126,7 @@ int Archivo_bloque_leer(TArchivo* this){
 		Bloque_destruir(this->bloque);
 
 	this->reg_in_bloque = 0;
+	this->cur_bloque++;
 
 	this->bloque = Bloque_crear(this->size_bloque);
 	return Bloque_leer(this->bloque, this->fd);
@@ -99,6 +167,10 @@ int Archivo_agregar_buf(TArchivo* this, uint8_t* buff, size_t size){
 	if(Bloque_agregar_buf(this->bloque, buff, size)){ //No entra
 		if(Bloque_escribir(this->bloque, this->fd))
 			return 1;
+
+		escribir_info_mapa(this);
+
+		this->cur_bloque++;
 		if(Bloque_destruir(this->bloque))
 			return 1;
 		if(! (this->bloque = Bloque_crear(this->size_bloque)))
@@ -109,9 +181,19 @@ int Archivo_agregar_buf(TArchivo* this, uint8_t* buff, size_t size){
 	return 0;
 }
 
+int Archivo_bloque_agregar_buf(TArchivo* this, uint8_t* buff, size_t size){
+	return Bloque_agregar_buf(this->bloque, buff, size);
+}
+
+int Archivo_bloque_libre(TArchivo* this, size_t size){
+	return Bloque_libre(this->bloque, size);
+}
+
 int Archivo_flush(TArchivo* this){
 	if(!this || !this->bloque)
 		return 1;
+
+	escribir_info_mapa(this);
 
 	if(Bloque_escribir(this->bloque, this->fd))
 		return 1;
@@ -148,15 +230,40 @@ int Archivo_destruir(TArchivo* this){
 	if(!this)
 		return 1;
 
+	if(this->path_adm){
+		FILE* fd_adm = fopen(this->path_adm, "w+b");
+		if(fd_adm == NULL) // Error
+			printf("Error loco escribiendo archivo de mapa de bits. Errno: %d\n", errno);
+
+		//printf("tama~no de mapa de bits '%d'\n", this->mapa_bits_size);
+		fwrite(this->mapa_bits, 1, this->mapa_bits_size, fd_adm);
+		fclose(fd_adm);
+	}
+
 	if(this->fd)
 		fclose(this->fd);
 	if(this->bloque)
 		Bloque_destruir(this->bloque);
 	if(this->path)
 		free(this->path);
+	if(this->path_adm)
+		free(this->path_adm);
 
 	free(this);
 	return 0;
 }
 
+int Archivo_libre(TArchivo* this, size_t n_bloque){
+	if(!this)
+		return 0;
 
+	size_t pos = n_bloque / 8;
+
+	if(pos > this->mapa_bits_size){
+		printf("NUMERO BLOQUE MAYOR A TAMA~NO MAPA\n");
+		return 0;
+	}
+
+	int flag = 1 << (n_bloque % 8);
+	return (flag &= this->mapa_bits[pos]) ? 1 : 0;
+}

@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#define BLOQUE_PORCENTAGE 70
+
 typedef struct TBloque TBloque;
 
 /** Crea bloque.
@@ -40,6 +42,13 @@ int Bloque_agregar_buf(TBloque* this, uint8_t* buff, size_t size);
  * @return int 1-> tiene, 0-> no tiene o error error
  */
 int Bloque_libre(TBloque* this, size_t size);
+
+/** Devuelve si el bloque esta lleno teniendo en cuenta el porcentage establecido.
+ * Es lo que usa el archivo para saber si marcar en 1 el bit del mapa para el control de espacio libre.
+ * @param TBloque* this: instancia de bloque
+ * @return int 1-> lleno, 0-> vacio
+ */
+int Bloque_lleno(TBloque* this);
 
 /** Devuelve el Buff (registro) numero n que este en el buffer, HAY QE LIBERAR EL PUNTERO QE DEVUELVE!!.
  * @param TBloque* this: instancia de bloque
