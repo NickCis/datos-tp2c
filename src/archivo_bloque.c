@@ -5,6 +5,7 @@
 
 struct TArchivo {
 	size_t size_bloque;
+	size_t size_reg;
 	size_t cant_bloque;
 	size_t cur_bloque; // -> Va a indicar el numero de bloque en donde esta parado fd en el archivo
 	int reg_in_bloque;
@@ -39,6 +40,10 @@ void escribir_info_mapa(TArchivo* this){
 
 TArchivo* Archivo_crear(char *path, size_t size){
 	return Archivo_crear_adm(path, NULL, size);
+}
+
+TArchivo* ArchivoFijo_crear(char *path, size_t size, size_t size_reg){
+	return ArchivoFijo_crear_adm(path, NULL, size, size_reg);
 }
 
 TArchivo* Archivo_crear_adm(char *path, char *path_adm , size_t size){
@@ -88,6 +93,14 @@ TArchivo* Archivo_crear_adm(char *path, char *path_adm , size_t size){
 	return this;
 }
 
+TArchivo* ArchivoFijo_crear_adm(char *path, char *path_adm , size_t size, size_t size_reg){
+	TArchivo* this = Archivo_crear_adm(path, path_adm, size);
+	if(this)
+		this->size_reg = size_reg;
+
+	return this;
+}
+
 
 int Archivo_bloque_seek(TArchivo* this, unsigned int n, int whence){
 	if(!this)
@@ -125,7 +138,10 @@ int Archivo_bloque_new(TArchivo* this){
 	if(this->bloque)
 		Bloque_destruir(this->bloque);
 
-	this->bloque = Bloque_crear(this->size_bloque);
+	if(this->size_reg)
+		this->bloque = BloqueFijo_crear(this->size_bloque, this->size_reg);
+	else
+		this->bloque = Bloque_crear(this->size_bloque);
 
 	if(this->bloque)
 		return 0;
@@ -137,13 +153,14 @@ int Archivo_bloque_leer(TArchivo* this){
 	if(!this)
 		return 1;
 
-	if(this->bloque)
-		Bloque_destruir(this->bloque);
+	//if(this->bloque)
+	//	Bloque_destruir(this->bloque);
 
 	this->reg_in_bloque = 0;
 	this->cur_bloque++;
 
-	this->bloque = Bloque_crear(this->size_bloque);
+	//this->bloque = Bloque_crear(this->size_bloque);
+	Archivo_bloque_new(this);
 	return Bloque_leer(this->bloque, this->fd);
 }
 
@@ -186,11 +203,37 @@ int Archivo_agregar_buf(TArchivo* this, uint8_t* buff, size_t size){
 		escribir_info_mapa(this);
 
 		this->cur_bloque++;
-		if(Bloque_destruir(this->bloque))
+		//if(Bloque_destruir(this->bloque))
+		//	return 1;
+		//if(! (this->bloque = Bloque_crear(this->size_bloque)))
+		//	return 1;
+		if(Archivo_bloque_new(this))
 			return 1;
-		if(! (this->bloque = Bloque_crear(this->size_bloque)))
-			return 1;
+
 		return Bloque_agregar_buf(this->bloque, buff, size); //No entra en bloque vacio
+	}
+
+	return 0;
+}
+
+int ArchivoFijo_agregar_buf(TArchivo* this, uint8_t* buff){
+	if(!this || !this->bloque)
+		return 1;
+
+	if(BloqueFijo_agregar_buf(this->bloque, buff)){ //No entra
+		if(Bloque_escribir(this->bloque, this->fd))
+			return 1;
+
+		escribir_info_mapa(this);
+
+		this->cur_bloque++;
+		//if(Bloque_destruir(this->bloque))
+		//	return 1;
+		//if(! (this->bloque = Bloque_crear(this->size_bloque)))
+		//	return 1;
+		if(Archivo_bloque_new(this))
+			return 1;
+		return BloqueFijo_agregar_buf(this->bloque, buff); //No entra en bloque vacio
 	}
 
 	return 0;
@@ -200,8 +243,16 @@ int Archivo_bloque_agregar_buf(TArchivo* this, uint8_t* buff, size_t size){
 	return Bloque_agregar_buf(this->bloque, buff, size);
 }
 
+int ArchivoFijo_bloque_agregar_buf(TArchivo* this, uint8_t* buff){
+	return BloqueFijo_agregar_buf(this->bloque, buff);
+}
+
 int Archivo_bloque_libre(TArchivo* this, size_t size){
 	return Bloque_libre(this->bloque, size);
+}
+
+int ArchivoFijo_bloque_libre(TArchivo* this){
+	return BloqueFijo_libre(this->bloque);
 }
 
 int Archivo_flush(TArchivo* this){
@@ -254,7 +305,8 @@ int Archivo_destruir(TArchivo* this){
 		fwrite(this->mapa_bits, 1, this->mapa_bits_size, fd_adm);
 		fclose(fd_adm);
 	}
-
+	if(this->mapa_bits)
+		free(this->mapa_bits);
 	if(this->fd)
 		fclose(this->fd);
 	if(this->bloque)

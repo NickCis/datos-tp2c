@@ -8,6 +8,7 @@ typedef struct {
 
 struct TBloque {
 	size_t size;
+	size_t size_reg;
 	uint8_t* regs;
 	TBloqueBuf* bloque;
 };
@@ -16,6 +17,15 @@ TBloque* Bloque_crear(size_t size){
 	TBloque* this = (TBloque*) calloc(1, sizeof(TBloque));
 
 	this->size = size;
+	this->bloque = (TBloqueBuf*) calloc(1, this->size);
+	return this;
+}
+
+TBloque* BloqueFijo_crear(size_t size, size_t size_reg){
+	TBloque* this = (TBloque*) calloc(1, sizeof(TBloque));
+
+	this->size = size;
+	this->size_reg = size_reg;
 	this->bloque = (TBloqueBuf*) calloc(1, this->size);
 	return this;
 }
@@ -60,6 +70,12 @@ int Bloque_libre(TBloque* this, size_t size){
 	return 0;
 }
 
+int BloqueFijo_libre(TBloque* this){
+	if(!this)
+		return 1;
+	return Bloque_libre(this, this->size_reg+sizeof(size_t));
+}
+
 int Bloque_lleno(TBloque* this){
 	if(!this)
 		return 0;
@@ -86,7 +102,24 @@ int Bloque_agregar_buf(TBloque* this, uint8_t* buff, size_t size){
 	return 0;
 }
 
-uint8_t* Bloque_get_buf(TBloque* this, int n, size_t* size){
+int BloqueFijo_agregar_buf(TBloque* this, uint8_t* buff){
+	if(!this)
+		return 1;
+
+	if(BloqueFijo_libre(this)) //No entra
+		return 2;
+
+	memcpy(this->bloque->buf+this->bloque->size_write, buff, this->size_reg);
+	this->bloque->size_write += this->size_reg;
+
+	return 0;
+}
+
+
+
+/** Solo para bloques de registros de longitud variable
+ */
+uint8_t* _Bloque_get_buf(TBloque* this, int n, size_t* size){
 	uint8_t* buff = NULL;
 	size_t pos = 0;
 	size_t *tam = &pos;
@@ -108,6 +141,37 @@ uint8_t* Bloque_get_buf(TBloque* this, int n, size_t* size){
 	memcpy(buff, this->bloque->buf+pos, *tam);
 
 	return buff;
+}
+
+/** Solo para bloques de registros de longitud fija
+ */
+uint8_t* _BloqueFijo_get_buf(TBloque* this, int n, size_t* size){
+	uint8_t* buff = NULL;
+	size_t pos = 0;
+
+	if(!this)
+		return NULL;
+
+	*size = this->size_reg;
+	pos = n * this->size_reg;
+
+	if(pos > this->bloque->size_write)
+		return NULL;
+
+	buff = (uint8_t*) malloc(this->size_reg);
+	memcpy(buff, this->bloque->buf+pos, this->size_reg);
+
+	return buff;
+}
+
+uint8_t* Bloque_get_buf(TBloque* this, int n, size_t* size){
+	if(!this)
+		return NULL;
+
+	if(this->size_reg)
+		return _BloqueFijo_get_buf(this, n, size);
+	else
+		return _Bloque_get_buf(this, n, size);
 }
 
 int Bloque_destruir(TBloque* this){

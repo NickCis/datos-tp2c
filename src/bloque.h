@@ -8,11 +8,18 @@
 
 typedef struct TBloque TBloque;
 
-/** Crea bloque.
+/** Crea bloque. De registros de longitud variable.
  * @param size_t size: tama~no del bloque
  * @return TBloque* puntero a bloque (malloquea memoria).
  */
 TBloque* Bloque_crear(size_t size);
+
+/** Crea bloque de registros de longitud fija.
+ * @param size_t size: tama~no del bloque
+ * @param size_t size_reg: tama~no del registro
+ * @return TBloque* puntero a bloque (malloquea memoria).
+ */
+TBloque* BloqueFijo_crear(size_t size, size_t size_reg);
 
 /** Lee Bloque.
  * @param TBloque* this: instancia de bloque
@@ -29,6 +36,7 @@ int Bloque_leer(TBloque* this, FILE* fd);
 int Bloque_escribir(TBloque* this, FILE* fd);
 
 /** Agrega(escribe) un buffer de informacion al bloque.
+ * Solo para bloques de registros de longitud variable.
  * @param TBloque* this: instancia de bloque
  * @param uint8_t* buff: buffer que se escribe en el bloque (no se modifica)
  * @param size_t size: tama~no del buffer
@@ -36,12 +44,28 @@ int Bloque_escribir(TBloque* this, FILE* fd);
  */
 int Bloque_agregar_buf(TBloque* this, uint8_t* buff, size_t size);
 
+/** Agrega(escribe) un buffer de informacion al bloque.
+ * Solo para bloques de registros de longitud fija.
+ * @param TBloque* this: instancia de bloque
+ * @param uint8_t* buff: buffer que se escribe en el bloque (no se modifica)
+ * @return int 0-> ok, resto error
+ */
+int BloqueFijo_agregar_buf(TBloque* this, uint8_t* buff);
+
 /** Devuelve si el bloque tiene espacio libre para escribir.
+ * Solo para bloques de resgistros longitud variable.
  * @param TBloque* this: instancia de bloque
  * @param size_t size: tama~no de lo que se quiere escribir
- * @return int 1-> tiene, 0-> no tiene o error error
+ * @return 0-> tiene, otro no tiene o  error error
  */
 int Bloque_libre(TBloque* this, size_t size);
+
+/** Devuelve si el bloque tiene espacio libre para escribir.
+ * Solo para bloques de registros longitud fija.
+ * @param TBloque* this: instancia de bloque
+ * @return 0-> tiene, otro no tiene o  error error
+ */
+int BloqueFijo_libre(TBloque* this);
 
 /** Devuelve si el bloque esta lleno teniendo en cuenta el porcentage establecido.
  * Es lo que usa el archivo para saber si marcar en 1 el bit del mapa para el control de espacio libre.

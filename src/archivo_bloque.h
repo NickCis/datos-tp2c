@@ -7,7 +7,7 @@
 
 typedef struct TArchivo TArchivo;
 
-/** Crea Archivo de bloques.
+/** Crea Archivo de bloques de registros de longitud variable.
  * Crea archivo de bloqes sin administracion de espacio libre con mapa de bits
  * @param char* path: path del archivo
  * @param size_t size: tama~no del bloque
@@ -15,13 +15,31 @@ typedef struct TArchivo TArchivo;
  */
 TArchivo* Archivo_crear(char *path, size_t size);
 
-/** Crea Archivo de bloques.
+/** Crea Archivo de bloques de registros de longitud fija.
+ * Crea archivo de bloqes sin administracion de espacio libre con mapa de bits
+ * @param char* path: path del archivo
+ * @param size_t size: tama~no del bloque
+ * @param size_t size_reg: tama~no del registro
+ * @return TArchivo* puntero a archivo de bloques (malloquea memoria).
+ */
+TArchivo* ArchivoFijo_crear(char *path, size_t size, size_t size_reg);
+
+/** Crea Archivo de bloques de registros de longitud variable.
  * @param char* path: path del archivo
  * @param char* path_adm: path del archivo de administracion (si es NULL se desactiva la administracion)
  * @param size_t size: tama~no del bloque
  * @return TArchivo* puntero a archivo de bloques (malloquea memoria).
  */
 TArchivo* Archivo_crear_adm(char *path, char *path_adm, size_t size);
+
+/** Crea Archivo de bloques de registros de longitud fija.
+ * @param char* path: path del archivo
+ * @param char* path_adm: path del archivo de administracion (si es NULL se desactiva la administracion)
+ * @param size_t size: tama~no del bloque
+ * @param size_t size_reg: tama~no del registro
+ * @return TArchivo* puntero a archivo de bloques (malloquea memoria).
+ */
+TArchivo* ArchivoFijo_crear_adm(char *path, char *path_adm, size_t size, size_t size_reg);
 
 /** Seekea por bloques (whence como el del fseek).
  * Si se quiere leer el bloque en la posicion, despues del seek se debe hacer un Archivo_bloque_leer. Recordar que despues de leer estaremos parados al final del blouqe, si se quiere escribri el bloque leido (por que se agrego algo), hay que seekear devuellta a la posicion del bloque y despues flushear
@@ -63,7 +81,7 @@ uint8_t* Archivo_get_buf(TArchivo* this, size_t* size);
 uint8_t* Archivo_get_bloque_buf(TArchivo* this, size_t* size);
 
 /** Agrega(escribe) un buffer de informacion al archivo. De llenarse el bloque actual, lo escribe a disco y crea uno nuevo.
- * Sirve para agregar secuencialmente registros, si se qiere tener un manejo de bloques no usar este metodo, usar Archivo_bloque_agregar_buf.
+ * Sirve para agregar secuencialmente registros, si se qiere tener un manejo de bloques no usar este metodo, usar Archivo_bloque_agregar_buf. Para archivos de bloques de registros de longitud variable
  * @param TArchivo* this: instancia de archivo de bloques
  * @param uint8_t* buff: buffer que se escribe en el bloque (no se modifica)
  * @param size_t size: tama~no del buffer
@@ -71,13 +89,31 @@ uint8_t* Archivo_get_bloque_buf(TArchivo* this, size_t* size);
  */
 int Archivo_agregar_buf(TArchivo* this, uint8_t* buff, size_t size);
 
+/** Agrega(escribe) un buffer de informacion al archivo. De llenarse el bloque actual, lo escribe a disco y crea uno nuevo.
+ * Sirve para agregar secuencialmente registros, si se qiere tener un manejo de bloques no usar este metodo, usar Archivo_bloque_agregar_buf. Para archivos de bloques de registros de longitud fija
+ * @param TArchivo* this: instancia de archivo de bloques
+ * @param uint8_t* buff: buffer que se escribe en el bloque (no se modifica)
+ * @param size_t size: tama~no del buffer
+ * @return int 0-> ok, resto error
+ */
+int ArchivoFijo_agregar_buf(TArchivo* this, uint8_t* buff);
+
 /** Devuelve si el bloque corriente tiene espacio libre para escribir.
+ * Sirve para archivos de bloques de registros de longitud variable
  * Hace una llamada Bloque_libre pasandole la instancia de bloque corriente.
  * @param TArchivo* this: instancia del archivo
  * @param size_t size: tama~no de lo que se quiere escribir
  * @return int 1-> tiene, 0-> no tiene o error error
  */
 int Archivo_bloque_libre(TArchivo* this, size_t size);
+
+/** Devuelve si el bloque corriente tiene espacio libre para escribir.
+ * Sirve para archivos de bloques de registros de longitud fija
+ * Hace una llamada Bloque_libre pasandole la instancia de bloque corriente.
+ * @param TArchivo* this: instancia del archivo
+ * @return int 1-> tiene, 0-> no tiene o error error
+ */
+int ArchivoFijo_bloque_libre(TArchivo* this);
 
 /** Devuelve si el bloque n esta lleno (utilizando la logica del mapa de bits)
  * @param TArchivo* this: instancia del archivo
@@ -87,13 +123,22 @@ int Archivo_bloque_libre(TArchivo* this, size_t size);
 int Archivo_libre(TArchivo* this, size_t n_bloque);
 
 /** Agrega(escribe) un buffer de informacion al bloque corriente.
+ * Para archivos de bloques de registros de longitud variable.
  * Hace una llamada a Bloque_agregar_buf pasandole la instancia de bloque corriente.
  * @param TArchivo* this: instancia de archivo.
  * @param uint8_t* buff: buffer que se escribe en el bloque (no se modifica)
- * @param size_t size: tama~no del buffer
  * @return int 0-> ok, resto error
  */
 int Archivo_bloque_agregar_buf(TArchivo* this, uint8_t* buff, size_t size);
+
+/** Agrega(escribe) un buffer de informacion al bloque corriente.
+ * Para archivos de bloques de registros de longitud fija.
+ * Hace una llamada a Bloque_agregar_buf pasandole la instancia de bloque corriente.
+ * @param TArchivo* this: instancia de archivo.
+ * @param uint8_t* buff: buffer que se escribe en el bloque (no se modifica)
+ * @return int 0-> ok, resto error
+ */
+int ArchivoFijo_bloque_agregar_buf(TArchivo* this, uint8_t* buff);
 
 /** Fuerza la escritura del bloque actual a disco.
  * NOTA: lo escribe donde este parado actualmente el fd, recordar que si se leyo el bloque, el fd va a estar parado al final del bloque en disco, habra que seekear al ppcio para dsp escribir.
