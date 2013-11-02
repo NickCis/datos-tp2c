@@ -98,6 +98,9 @@ int main(int argc, char* argv[]){
 			// Vuelvo a correr el fd al principio del bloque
 			Archivo_bloque_seek(arch, 1, SEEK_SET);
 
+			// No me interesa el bloque en ram, asi que creo uno nuevo.
+			Archivo_bloque_new(arch);
+
 			// Se deberia controlar el error de si se pudo escribir o no!.
 			Archivo_bloque_agregar_buf(arch, (uint8_t*) "esto es modificado", 19);
 

@@ -110,12 +110,27 @@ int Archivo_bloque_seek(TArchivo* this, unsigned int n, int whence){
 			break;
 	}
 
+	//if(this->bloque)
+	//	Bloque_destruir(this->bloque);
+
+	//this->bloque = Bloque_crear(this->size_bloque);
+
+	return fseek(this->fd, this->size_bloque * n, whence);
+}
+
+int Archivo_bloque_new(TArchivo* this){
+	if(!this)
+		return 1;
+
 	if(this->bloque)
 		Bloque_destruir(this->bloque);
 
 	this->bloque = Bloque_crear(this->size_bloque);
 
-	return fseek(this->fd, this->size_bloque * n, whence);
+	if(this->bloque)
+		return 0;
+
+	return 1;
 }
 
 int Archivo_bloque_leer(TArchivo* this){

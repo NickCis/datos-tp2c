@@ -24,7 +24,7 @@ TArchivo* Archivo_crear(char *path, size_t size);
 TArchivo* Archivo_crear_adm(char *path, char *path_adm, size_t size);
 
 /** Seekea por bloques (whence como el del fseek).
- * Destruye el bloque actual y crea uno vacio, si se quiere leer el bloque en la posicion, se debe hacer un Archivo_bloque_leer.
+ * Si se quiere leer el bloque en la posicion, despues del seek se debe hacer un Archivo_bloque_leer. Recordar que despues de leer estaremos parados al final del blouqe, si se quiere escribri el bloque leido (por que se agrego algo), hay que seekear devuellta a la posicion del bloque y despues flushear
  * TODO: no chequea que el bloque este dentro del archivo, es decir, si pones un numero bloque mas grande que el del archivo, el comportamiendo no esta definido.
  * @param TArchivo* this: instancia de archivo de bloques
  * @param unsinged int n: numero de bloque
@@ -33,13 +33,22 @@ TArchivo* Archivo_crear_adm(char *path, char *path_adm, size_t size);
  */
 int Archivo_bloque_seek(TArchivo* this, unsigned int n, int whence);
 
+/* Destruye el bloque que esta actualmente en memoria y crea uno vacio en memoria.
+ * Para escribir hay que flushear. Sirve para cuando seekeas queres reemplazar el bloque existente.
+ * @param TArchivo* this: instancia de archivo de bloques
+ * @return int 0->ok, resto error
+ */
+int Archivo_bloque_new(TArchivo* this);
+
 /** Lee bloque del archivo.
+ * Va a correr el fd al final del bloque, para escribir el bloque leido a disco, hay que seekear al ppcio del bloque y despues flushear.
  * @param TArchivo* this: instancia de archivo de bloques
  * @return int 0->ok, resto error
  */
 int Archivo_bloque_leer(TArchivo* this);
 
 /** Devuelve buffer del bloque abierto, de finalizar el bloque lee el bloque siguiente y devuelve el buffer.
+ * Sirve para leer secuencialmente todo el archivo. Si no se qiere hacer eso, usar el metodo Archivo_get_bloque_buf.
  * @param TArchivo* this: instancia de archivo de bloques
  * @param size_t size: tama~no del buffer (parametro de salida)
  * @return uint8_t*: puntero a buffer malloqueado (El usuario debe liberar!) o NULL si error
@@ -54,6 +63,7 @@ uint8_t* Archivo_get_buf(TArchivo* this, size_t* size);
 uint8_t* Archivo_get_bloque_buf(TArchivo* this, size_t* size);
 
 /** Agrega(escribe) un buffer de informacion al archivo. De llenarse el bloque actual, lo escribe a disco y crea uno nuevo.
+ * Sirve para agregar secuencialmente registros, si se qiere tener un manejo de bloques no usar este metodo, usar Archivo_bloque_agregar_buf.
  * @param TArchivo* this: instancia de archivo de bloques
  * @param uint8_t* buff: buffer que se escribe en el bloque (no se modifica)
  * @param size_t size: tama~no del buffer
@@ -69,8 +79,7 @@ int Archivo_agregar_buf(TArchivo* this, uint8_t* buff, size_t size);
  */
 int Archivo_bloque_libre(TArchivo* this, size_t size);
 
-/** Devuelve si el bloque esta lleno (utilizando la logica del mapa de bits)
- * 
+/** Devuelve si el bloque n esta lleno (utilizando la logica del mapa de bits)
  * @param TArchivo* this: instancia del archivo
  * @param size_t n_bloque: numero de bloque, numerado desde 0
  * @return int numero -> lleno, 0-> no lleno
@@ -87,6 +96,7 @@ int Archivo_libre(TArchivo* this, size_t n_bloque);
 int Archivo_bloque_agregar_buf(TArchivo* this, uint8_t* buff, size_t size);
 
 /** Fuerza la escritura del bloque actual a disco.
+ * NOTA: lo escribe donde este parado actualmente el fd, recordar que si se leyo el bloque, el fd va a estar parado al final del bloque en disco, habra que seekear al ppcio para dsp escribir.
  * @param TArchivo* this: instancia de archivo de bloques
  * @return int 0-> ok, resto error
  */
