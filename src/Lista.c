@@ -1,6 +1,5 @@
 #include "lista.h"
 
-
 //estructura nodo.
 typedef struct nodo{
 
@@ -152,7 +151,6 @@ void *lista_ver_primero(const lista_t* l){
         return (l->primero)->valor;
 
 }
-
 //Devuelve el tamanio de la lista.
 size_t lista_tamanio(const lista_t* l){
 
