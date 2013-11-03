@@ -73,7 +73,7 @@ int Bloque_libre(TBloque* this, size_t size){
 int BloqueFijo_libre(TBloque* this){
 	if(!this)
 		return 1;
-	return Bloque_libre(this, this->size_reg+sizeof(size_t));
+	return Bloque_libre(this, this->size_reg-sizeof(size_t));
 }
 
 int Bloque_lleno(TBloque* this){
@@ -133,7 +133,7 @@ uint8_t* _Bloque_get_buf(TBloque* this, int n, size_t* size){
 		pos +=  sizeof(size_t);
 	} while( n-- > 0 && pos < this->bloque->size_write);
 
-	if(pos > this->bloque->size_write)
+	if(pos >= this->bloque->size_write)
 		return NULL;
 
 	*size = *tam;
@@ -155,7 +155,7 @@ uint8_t* _BloqueFijo_get_buf(TBloque* this, int n, size_t* size){
 	*size = this->size_reg;
 	pos = n * this->size_reg;
 
-	if(pos > this->bloque->size_write)
+	if(pos >= this->bloque->size_write)
 		return NULL;
 
 	buff = (uint8_t*) malloc(this->size_reg);

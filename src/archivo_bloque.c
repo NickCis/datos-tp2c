@@ -95,8 +95,10 @@ TArchivo* Archivo_crear_adm(char *path, char *path_adm , size_t size){
 
 TArchivo* ArchivoFijo_crear_adm(char *path, char *path_adm , size_t size, size_t size_reg){
 	TArchivo* this = Archivo_crear_adm(path, path_adm, size);
-	if(this)
+	if(this){
 		this->size_reg = size_reg;
+		Archivo_bloque_new(this);
+	}
 
 	return this;
 }
