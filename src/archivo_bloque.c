@@ -194,6 +194,13 @@ uint8_t* Archivo_get_bloque_buf(TArchivo* this, size_t* size){
 	return buf;
 }
 
+uint8_t* Archivo_bloque_get_buf(TArchivo* this, int n, size_t* size){
+	if(!this || !this->bloque)
+		return NULL;
+
+	return Bloque_get_buf(this->bloque, n, size);
+}
+
 int Archivo_agregar_buf(TArchivo* this, uint8_t* buff, size_t size){
 	if(!this || !this->bloque)
 		return 1;
@@ -262,6 +269,10 @@ int Archivo_flush(TArchivo* this){
 		return 1;
 
 	escribir_info_mapa(this);
+
+	this->cur_bloque++;
+	if(this->cur_bloque > this->cant_bloque)
+		this->cant_bloque = this->cur_bloque;
 
 	if(Bloque_escribir(this->bloque, this->fd))
 		return 1;
@@ -335,4 +346,8 @@ int Archivo_libre(TArchivo* this, size_t n_bloque){
 
 	int flag = 1 << (n_bloque % 8);
 	return (flag &= this->mapa_bits[pos]) ? 1 : 0;
+}
+
+int Archivo_get_cur_bloque(TArchivo* this){
+	return this->cur_bloque;
 }

@@ -80,6 +80,15 @@ uint8_t* Archivo_get_buf(TArchivo* this, size_t* size);
  */
 uint8_t* Archivo_get_bloque_buf(TArchivo* this, size_t* size);
 
+/** Devuelve el Buff (registro) numero n que este en el buffer, HAY QE LIBERAR EL PUNTERO QE DEVUELVE!!.
+ * Llama la funcion Bloque_get_buf( , n, size)
+ * @param TArchivo* this: instancia de bloque
+ * @param int n: numero de registro que se quiere leer.
+ * @param size_t size: tama~no del buffer (parametro de salida)
+ * @return uint8_t*: puntero a buffer malloqueado (El usuario debe liberar!) o NULL si error
+ */
+uint8_t* Archivo_bloque_get_buf(TArchivo* this, int n, size_t* size);
+
 /** Agrega(escribe) un buffer de informacion al archivo. De llenarse el bloque actual, lo escribe a disco y crea uno nuevo.
  * Sirve para agregar secuencialmente registros, si se qiere tener un manejo de bloques no usar este metodo, usar Archivo_bloque_agregar_buf. Para archivos de bloques de registros de longitud variable
  * @param TArchivo* this: instancia de archivo de bloques
@@ -160,6 +169,12 @@ int Archivo_close(TArchivo* this);
  * @return int 0->ok, resto error.
  */
 int Archivo_open(TArchivo* this);
+
+/** Devuelve el numero del bloque en el que esta parado el fd.
+ * @param TArchivo* this: instancia de archivo de bloques
+ * @return numero de bloque.
+ */
+int Archivo_get_cur_bloque(TArchivo* this);
 
 /** Destruye Archivo.
  * @param TArchivo* this: instancia de archivo de bloques
