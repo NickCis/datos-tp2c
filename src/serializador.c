@@ -52,7 +52,6 @@ uint8_t* Serializador_pack(uint8_t* buf, SerializadorTipos tipo, SerializadorDat
 
 uint8_t* Serializador_unpack(SerializadorData* data, SerializadorTipos tipo, size_t* size, size_t* pos){
 	uint8_t* ret_ptr = NULL;
-	printf("pos %d\n", *pos);
 	switch(tipo){
 		case SER_VAR_CHAR:{
 			size_t* tam = (size_t*) (data->buf + *pos);

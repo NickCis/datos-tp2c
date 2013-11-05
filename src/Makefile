@@ -32,4 +32,4 @@ main: $(o_files_no_main) main.o
 	$(CC) $(LDFLAGS) $(CFLAGS) main.o $(o_files_no_main) -o $@
 
 clean:
-	$(RM) *.o test/
+	$(RM) *.o test/ main
