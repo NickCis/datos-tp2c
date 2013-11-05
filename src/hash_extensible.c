@@ -4,6 +4,8 @@
 
 #include "archivo_bloque.h"
 
+// TODO: ver problema cuando se da de baja el ultimo elemento del hash, al intentar volver agregar sale con segfault
+
 struct THashExtensible{
 	size_t block_size;
 	char* path;
@@ -264,7 +266,6 @@ uint8_t* HashExtensible_del(THashExtensible* this, unsigned int id, size_t *size
 
 	uint8_t *retval = NULL;
 	if(i>1){ // No es el unico elemento en el bloque
-		printf("No es unico elemento en bloque\n");
 		for(existe_id=0 ; existe_id < i ; existe_id++){
 			if(this->get_id(regs[existe_id].ele, regs[existe_id].size) != id){
 				Archivo_bloque_agregar_buf(this->arch_bloques, regs[existe_id].ele, regs[existe_id].size);
