@@ -30,7 +30,7 @@ TUsuario* _usuarioDesdeBuf(uint8_t* buf, size_t size);
 /** Serializa la data, y devuelve un buffer, size es un parametro de salida, tama~no del buffer.
  * Hay que liberar la salida
  */
-uint8_t* _bufDesdeData(
+uint8_t* _userBufDesdeData(
 	unsigned int dni,
 	char* nombre,
 	char* apellido,
@@ -75,7 +75,7 @@ TUsuario* Usuario_new(
 	char t_u
 ){
 	size_t size = 0;
-	uint8_t * buf = _bufDesdeData(
+	uint8_t * buf = _userBufDesdeData(
 		dni,
 		nombre,
 		apellido,
@@ -98,7 +98,7 @@ TUsuario* Usuario_new(
 	return user;
 }
 
-uint8_t* _bufDesdeData(
+uint8_t* _userBufDesdeData(
 	unsigned int dni,
 	char* nombre,
 	char* apellido,
@@ -330,7 +330,7 @@ int Usuario_store(TUsuario* this){
 
 	free(buf);
 
-	buf = _bufDesdeData(
+	buf = _userBufDesdeData(
 		this->dni,
 		this->nombre,
 		this->apellido,

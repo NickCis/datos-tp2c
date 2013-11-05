@@ -2,6 +2,7 @@
 #include <string.h>
 #include "stdin_io.h"
 #include "usuarios.h"
+#include "servicios.h"
 
 void conectarse();
 void crear_usuario();
@@ -9,11 +10,13 @@ void menu_conectado_usuario(TUsuario* user);
 void menu_conectado_provedor(TUsuario* user);
 void menu_conectado_admin(TUsuario* user);
 int modificar_datos(TUsuario* user);
+void crear_servicio(TUsuario* user);
 
 int borrar_usuario(unsigned int dni);
 
 int main(int argc, char* argv[]){
 	Usuarios_init();
+	Servicios_init();
 	printf(" Paginas Doradas ** \n");
 	while(1){
 		printf("Que desea hacer?\n");
@@ -39,6 +42,7 @@ int main(int argc, char* argv[]){
 	}
 
 	Usuarios_end();
+	Servicios_end();
 }
 
 void conectarse(){
@@ -168,6 +172,7 @@ void menu_conectado_usuario(TUsuario* user){
 		printf("1 - Modificar sus datos\n");
 		printf("2 - Darse de baja\n");
 		printf("3 - Buscar Servicio\n");
+		printf("4 - Convertirse en provedor\n");
 		printf("s - Salir\n");
 		printf("Seleccione opcion\n");
 		char opt = read_opt();
@@ -185,6 +190,12 @@ void menu_conectado_usuario(TUsuario* user){
 
 			case '3':
 				printf("TODO\n");
+				break;
+
+			case '4':
+				Usuario_set_tipo(user, 'p');
+				Usuario_store(user);
+				return;
 				break;
 
 			default:
@@ -265,8 +276,93 @@ int modificar_datos(TUsuario* user){
 }
 
 void menu_conectado_provedor(TUsuario* user){
-	printf("TODO:\n");
+	while(1){
+		printf("Que desea hacer?\n");
+		printf("1 - Modificar sus datos\n");
+		printf("2 - Darse de baja\n");
+		printf("3 - Crear Servicio\n");
+		printf("4 - Listar mis servicios\n");
+		printf("5 - Asociar servicios a categorias\n");
+		printf("s - Salir\n");
+		printf("Seleccione opcion\n");
+		char opt = read_opt();
+		if(opt == 's')
+			break;
+		switch(opt){
+			case '1':
+				modificar_datos(user);
+				break;
+
+			case '2':
+				if(! borrar_usuario(Usuario_get_dni(user)))
+					return;
+				break;
+
+			case '3':
+				crear_servicio(user);
+				break;
+
+			case '4':{
+				unsigned int id_p = 0;
+				TServicio* serv;
+				while( (serv = Servicio_from_dni_prov(Usuario_get_dni(user), &id_p)) ){
+					printf("id) %d\n", Servicio_get_id(serv));
+					printf("dni_p) %d\n", Servicio_get_dni_p(serv));
+					printf("nombre: %s\n", Servicio_get_nombre(serv));
+					printf("desc) %s\n", Servicio_get_descripcion(serv));
+					printf("tipo: %c\n", Servicio_get_tipo(serv));
+					free(serv);
+				}
+				
+				break;
+			}
+			case '5':
+				printf("TODO\n");
+				break;
+
+			default:
+				break;
+		}
+	}
 }
+
+void crear_servicio(TUsuario* user){
+	char nombre[101];
+	char desc[301];
+	char tipo = 'g';
+	printf("Crear un nuevo servicio\n");
+
+	printf("Ingrese nombre:\n");
+	read_str(nombre, 100);
+
+	printf("Ingrese descripcion:\n");
+	read_str(desc, 300);
+	do{
+		printf("Ingrese tipo (g -> gratuito, p -> precio fijo, s -> subasta)\n");
+		tipo = read_opt();
+	} while(tipo != 'g' && tipo != 'p' && tipo != 's');
+	printf("Se creara usuario:\n");
+	printf("\t* Nombre: '%s'\n", nombre);
+	printf("\t* Descripcion: '%s'\n", desc);
+	printf("\t* Tipo: '%c'\n", tipo);
+	printf("Esta seguro?(s/n)\n");
+	if(read_opt() != 's'){
+		printf("Abortando...\n");
+		return;
+	}
+
+	TServicio* serv = Servicio_new(
+		Usuario_get_dni(user),
+		nombre,
+		desc,
+		tipo
+	);
+	if(!serv){
+		printf("Error creando el servicio\n");
+	}
+	free(serv);
+}
+
 void menu_conectado_admin(TUsuario* user){
 	printf("TODO:\n");
 }
