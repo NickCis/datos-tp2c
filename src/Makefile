@@ -28,6 +28,9 @@ test: $(o_files);
 cargador_masivo: $(o_files)
 	$(CC) $(LDFLAGS) $(CFLAGS) main_cargador_masivo.o $(o_files_no_main) -o $@
 
+creador_admin: $(o_files_no_main) main_creador_admin.o
+	$(CC) $(LDFLAGS) $(CFLAGS) main_creador_admin.o $(o_files_no_main) -o $@
+
 main: $(o_files_no_main) main.o
 	$(CC) $(LDFLAGS) $(CFLAGS) main.o $(o_files_no_main) -o $@
 

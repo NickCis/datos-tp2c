@@ -12,5 +12,16 @@
 #define SERVICIOS_HASH_BLOQUE_SIZE (512)
 #define SERVICIOS_LAST_ID_FILE "./serv_last_id.dat"
 
+#define COTIZACIONES_HASH_BLOQUE_PATH "./cot_hash_block.dat"
+#define COTIZACIONES_HASH_TABLA_PATH "./cot_hash_table.dat"
+#define COTIZACIONES_HASH_BAJA_PATH "./cot_hash_baja.dat"
+#define COTIZACIONES_HASH_BLOQUE_SIZE (512)
+#define COTIZACIONES_LAST_ID_FILE "./cot_last_id.dat"
+
+#define CONSULTAS_HASH_BLOQUE_PATH "./con_hash_block.dat"
+#define CONSULTAS_HASH_TABLA_PATH "./con_hash_table.dat"
+#define CONSULTAS_HASH_BAJA_PATH "./con_hash_baja.dat"
+#define CONSULTAS_HASH_BLOQUE_SIZE (512)
+#define CONSULTAS_LAST_ID_FILE "./con_last_id.dat"
 
 #endif

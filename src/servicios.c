@@ -3,8 +3,10 @@
 #include "hash_extensible.h"
 #include "config.h"
 #include "serializador.h"
+#include "autoincrement.h"
 
 THashExtensible* hash_servicios = NULL;
+unsigned int servicios_last_id = 0;
 
 struct TServicio {
 	unsigned int id;
@@ -13,27 +15,6 @@ struct TServicio {
 	char *descripcion;
 	char tipo;
 };
-
-unsigned int _getLastId(){
-	unsigned int ret = 0;
-	FILE* fd = fopen(SERVICIOS_LAST_ID_FILE, "rb");
-	if(!fd)
-		return 0;
-
-	fread(&ret, sizeof(unsigned int), 1, fd);
-	fclose(fd);
-	return ret;
-}
-
-int _writeLastId(unsigned int id){
-	FILE* fd = fopen(SERVICIOS_LAST_ID_FILE, "wb");
-	if(!fd)
-		return 1;
-
-	fwrite(&id, sizeof(unsigned int), 1, fd);
-	fclose(fd);
-	return 0;
-}
 
 unsigned int Servicios_get_id(uint8_t* ele, size_t size){
 	unsigned int id = * ( (unsigned int*) ele);
@@ -69,12 +50,16 @@ int Servicios_init(){
 	if(!hash_servicios)
 		return 1;
 
+	servicios_last_id = getLastId(SERVICIOS_LAST_ID_FILE);
+
 	return 0;
 }
 
 int Servicios_end(){
 	HashExtensible_destruir(hash_servicios);
+	writeLastId(SERVICIOS_LAST_ID_FILE, servicios_last_id);
 	hash_servicios = NULL;
+	servicios_last_id = 0;
 	return 0;
 }
 
@@ -85,7 +70,7 @@ TServicio* Servicio_new(
 	char* desc,
 	char tipo
 ){
-	unsigned int last_id = _getLastId();
+	unsigned int last_id = servicios_last_id;
 	size_t size = 0;
 	uint8_t* buf = _servBufDesdeData(
 		last_id+1,
@@ -104,7 +89,7 @@ TServicio* Servicio_new(
 	TServicio* serv = _servicioDesdeBuf(buf, size);
 	free(buf);
 
-	_writeLastId(last_id+1);
+	servicios_last_id++;
 	return serv;
 }
 
@@ -195,7 +180,7 @@ TServicio* Servicio_from_id(unsigned int id){
 }
 
 TServicio* Servicio_from_dni_prov(unsigned int dni_prov, unsigned int *id_p){
-	unsigned int last_id = _getLastId();
+	unsigned int last_id = servicios_last_id;
 	if(*id_p >= last_id)
 		return NULL;
 
@@ -241,14 +226,4 @@ TServicio* Servicio_del(unsigned int id){
 	free(buf);
 
 	return serv;
-}
-
-int Servicios_free(TServicio* this){
-	if(!this)
-		return 1;
-
-	free(this->nombre);
-	free(this->descripcion);
-	free(this);
-	return 0;
 }

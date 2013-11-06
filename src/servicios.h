@@ -45,7 +45,7 @@ char Servicio_get_tipo(TServicio* this);
 
 /** Libera memroia para la entidad usuario
  */
-int Servicios_free(TServicio* this);
+int Servicio_free(TServicio* this);
 
 
 #endif

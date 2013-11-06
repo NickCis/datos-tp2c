@@ -3,6 +3,8 @@
 #include "stdin_io.h"
 #include "usuarios.h"
 #include "servicios.h"
+#include "consultas.h"
+#include "cotizaciones.h"
 
 void conectarse();
 void crear_usuario();
@@ -12,12 +14,19 @@ void menu_conectado_admin(TUsuario* user);
 int modificar_datos(TUsuario* user);
 void crear_servicio(TUsuario* user);
 void borrar_servicio(TUsuario* user);
+void buscar_servicio(TUsuario* user);
+void imprimir_servicio(TServicio* serv);
+void menu_pos_busqueda_de_servicio(TUsuario* user, unsigned int idserv);
+void nueva_consulta(TUsuario* user, TServicio* serv);
+void nueva_cotizacion(TUsuario* user, TServicio* serv);
 
 int borrar_usuario(unsigned int dni);
 
 int main(int argc, char* argv[]){
 	Usuarios_init();
 	Servicios_init();
+	Consultas_init();
+	Cotizaciones_init();
 	printf(" Paginas Doradas ** \n");
 	while(1){
 		printf("Que desea hacer?\n");
@@ -44,6 +53,8 @@ int main(int argc, char* argv[]){
 
 	Usuarios_end();
 	Servicios_end();
+	Consultas_end();
+	Cotizaciones_end();
 }
 
 void conectarse(){
@@ -78,6 +89,7 @@ void conectarse(){
 		case 'p':
 			menu_conectado_provedor(user);
 			break;
+		case 's':
 		case 'a':
 			menu_conectado_admin(user);
 			break;
@@ -190,7 +202,7 @@ void menu_conectado_usuario(TUsuario* user){
 				break;
 
 			case '3':
-				printf("TODO\n");
+				buscar_servicio(user);
 				break;
 
 			case '4':
@@ -276,6 +288,117 @@ int modificar_datos(TUsuario* user){
 	return 0;
 }
 
+void buscar_servicio(TUsuario* user){
+	while(1){
+		printf("Buscar servicios\n");
+		printf("Que desea hacer?\n");
+		printf("1 - Por provedoor\n");
+		printf("2 - Por servicio\n");
+		printf("3 - Por Categoria\n");
+		printf("4 - Por Palabra clave (en descripcion y consulta)\n");
+		printf("s - Salir\n");
+		char opt = read_opt();
+
+		if(opt == 's')
+			break;
+
+		switch(opt){
+			case '1':
+				printf("TODO:\n");
+				break;
+
+			case '2':{
+				printf("Ingrese id servicio:\n");
+				unsigned int id = get_dni();
+				TServicio* serv = Servicio_from_id(id);
+				imprimir_servicio(serv);
+				menu_pos_busqueda_de_servicio(user, Servicio_get_id(serv));
+				Servicio_free(serv);
+				break;
+			}
+
+			case '3':
+				printf("TODO:\n");
+				break;
+
+			case '4':
+				printf("TODO:\n");
+				break;
+
+			default:
+				break;
+		}
+	}
+}
+
+void menu_pos_busqueda_de_servicio(TUsuario* user, unsigned int idserv){
+	if(!idserv){
+		printf("Ingrese id de servicio para realizar una accion:\n");
+		idserv = get_dni();
+	}
+	TServicio* serv = Servicio_from_id(idserv);
+	if(!serv){
+		printf("Servicio #%d inexistente\n", idserv);
+		return;
+	}
+
+	printf("Que desea hacer?\n");
+	printf("1 - Realizar una consulta\n");
+	printf("2 - Realizar un pedido de cotizacion\n");
+	printf("s - Salir\n");
+	char opt = read_opt();
+	switch(opt){
+		case '1':
+			nueva_consulta(user, serv);
+			break;
+		case '2':
+			nueva_cotizacion(user, serv);
+			break;
+		default:
+			break;
+	}
+	Servicio_free(serv);
+}
+
+void nueva_consulta(TUsuario* user, TServicio* serv){
+	char consulta[301];
+	char fecha[9] = "06112013";
+	char hora[5] = "0529";
+	printf("Ingrese Consulta:\n");
+	read_str(consulta, 300);
+
+	TConsulta* cons = Consulta_new(
+		Servicio_get_id(serv),
+		Usuario_get_dni(user),
+		consulta,
+		fecha,
+		hora
+	);
+
+	if(!cons){
+		printf("Error creando consulta\n");
+		return;
+	}
+	Consulta_free(cons);
+	printf("Consulta creada satisfactoriamente\n");
+}
+
+void nueva_cotizacion(TUsuario* user, TServicio* serv){
+	printf("TODO:\n");
+}
+
+void imprimir_servicio(TServicio* serv){
+	if(! serv){
+		printf("Servicio inexistente\n");
+		return;
+	}
+	printf("* Servicio #%d\n", Servicio_get_id(serv));
+	printf("\tdni_p: '%d'\n", Servicio_get_dni_p(serv));
+	printf("\tnombre: '%s'\n", Servicio_get_nombre(serv));
+	printf("\tdesc: '%s'\n", Servicio_get_descripcion(serv));
+	printf("\ttipo: '%c'\n", Servicio_get_tipo(serv));
+}
+
 void menu_conectado_provedor(TUsuario* user){
 	while(1){
 		printf("Que desea hacer?\n");
@@ -312,12 +435,8 @@ void menu_conectado_provedor(TUsuario* user){
 				unsigned int id_p = 0;
 				TServicio* serv;
 				while( (serv = Servicio_from_dni_prov(Usuario_get_dni(user), &id_p)) ){
-					printf("id) %d\n", Servicio_get_id(serv));
-					printf("dni_p) %d\n", Servicio_get_dni_p(serv));
-					printf("nombre: %s\n", Servicio_get_nombre(serv));
-					printf("desc) %s\n", Servicio_get_descripcion(serv));
-					printf("tipo: %c\n", Servicio_get_tipo(serv));
-					Servicios_free(serv);
+					imprimir_servicio(serv);
+					Servicio_free(serv);
 				}
 				
 				break;
@@ -367,7 +486,7 @@ void crear_servicio(TUsuario* user){
 		printf("Error creando el servicio\n");
 	}
 
-	Servicios_free(serv);
+	Servicio_free(serv);
 }
 
 void borrar_servicio(TUsuario* user){
@@ -391,18 +510,18 @@ void borrar_servicio(TUsuario* user){
 
 	if(Usuario_get_dni(user) != Servicio_get_dni_p(serv)){
 		printf("Intentaste borrar un servicio que no te pertenece\n");
-		Servicios_free(serv);
+		Servicio_free(serv);
 		return;
 	}
 	
-	Servicios_free(serv);
+	Servicio_free(serv);
 	serv = Servicio_del(id);
 	if(! serv){
 		printf("Error borrando el servicio\n");
 		return;
 	}
 
-	Servicios_free(serv);
+	Servicio_free(serv);
 }
 
 void menu_conectado_admin(TUsuario* user){
