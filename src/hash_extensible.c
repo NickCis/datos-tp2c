@@ -4,8 +4,6 @@
 
 #include "archivo_bloque.h"
 
-// TODO: ver problema cuando se da de baja el ultimo elemento del hash, al intentar volver agregar sale con segfault
-
 struct THashExtensible{
 	size_t block_size;
 	char* path;
@@ -287,7 +285,7 @@ uint8_t* HashExtensible_del(THashExtensible* this, unsigned int id, size_t *size
 		if(second_offset >= this->tabla_len)
 			second_offset -= this->tabla_len;
 
-		if(this->tabla[first_offset] == this->tabla[second_offset]){ // Existe bloque de reemplazo!
+		if(this->tabla[first_offset] == this->tabla[second_offset] && this->tabla_len > 1){ // Existe bloque de reemplazo!
 			// Seekeo el bloque reemplazo
 			if(Archivo_bloque_seek(this->arch_bloques, this->tabla[first_offset], SEEK_SET))
 				return NULL;

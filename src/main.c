@@ -11,6 +11,7 @@ void menu_conectado_provedor(TUsuario* user);
 void menu_conectado_admin(TUsuario* user);
 int modificar_datos(TUsuario* user);
 void crear_servicio(TUsuario* user);
+void borrar_servicio(TUsuario* user);
 
 int borrar_usuario(unsigned int dni);
 
@@ -281,8 +282,9 @@ void menu_conectado_provedor(TUsuario* user){
 		printf("1 - Modificar sus datos\n");
 		printf("2 - Darse de baja\n");
 		printf("3 - Crear Servicio\n");
-		printf("4 - Listar mis servicios\n");
-		printf("5 - Asociar servicios a categorias\n");
+		printf("4 - Dar de baja Servicio\n");
+		printf("5 - Listar mis servicios\n");
+		printf("6 - Asociar servicios a categorias\n");
 		printf("s - Salir\n");
 		printf("Seleccione opcion\n");
 		char opt = read_opt();
@@ -302,7 +304,11 @@ void menu_conectado_provedor(TUsuario* user){
 				crear_servicio(user);
 				break;
 
-			case '4':{
+			case '4':
+				borrar_servicio(user);
+				break;
+
+			case '5':{
 				unsigned int id_p = 0;
 				TServicio* serv;
 				while( (serv = Servicio_from_dni_prov(Usuario_get_dni(user), &id_p)) ){
@@ -311,12 +317,12 @@ void menu_conectado_provedor(TUsuario* user){
 					printf("nombre: %s\n", Servicio_get_nombre(serv));
 					printf("desc) %s\n", Servicio_get_descripcion(serv));
 					printf("tipo: %c\n", Servicio_get_tipo(serv));
-					free(serv);
+					Servicios_free(serv);
 				}
 				
 				break;
 			}
-			case '5':
+			case '6':
 				printf("TODO\n");
 				break;
 
@@ -360,7 +366,43 @@ void crear_servicio(TUsuario* user){
 	if(!serv){
 		printf("Error creando el servicio\n");
 	}
-	free(serv);
+
+	Servicios_free(serv);
+}
+
+void borrar_servicio(TUsuario* user){
+	unsigned int id;
+	printf("Borrar un nuevo servicio\n");
+
+	printf("Ingrese id:\n");
+	id = get_dni();
+
+	printf("Esta seguro?(s/n)\n");
+	if(read_opt() != 's'){
+		printf("Abortando...\n");
+		return;
+	}
+
+	TServicio* serv = Servicio_from_id(id);
+	if(!serv){
+		printf("Servicio inexistente\n");
+		return;
+	}
+
+	if(Usuario_get_dni(user) != Servicio_get_dni_p(serv)){
+		printf("Intentaste borrar un servicio que no te pertenece\n");
+		Servicios_free(serv);
+		return;
+	}
+	
+	Servicios_free(serv);
+	serv = Servicio_del(id);
+	if(! serv){
+		printf("Error borrando el servicio\n");
+		return;
+	}
+
+	Servicios_free(serv);
 }
 
 void menu_conectado_admin(TUsuario* user){

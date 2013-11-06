@@ -203,7 +203,7 @@ TServicio* Servicio_from_dni_prov(unsigned int dni_prov, unsigned int *id_p){
 	do {
 		free(serv);
 		serv = Servicio_from_id(++(*id_p));
-	}while(serv != NULL && dni_prov != Servicio_get_dni_p(serv));
+	}while(dni_prov != Servicio_get_dni_p(serv));
 
 	return serv;
 }
@@ -232,4 +232,23 @@ char Servicio_get_tipo(TServicio* this){
 	if(!this)
 		return 0;
 	return this->tipo;
+}
+
+TServicio* Servicio_del(unsigned int id){
+	size_t size;
+	uint8_t* buf = HashExtensible_del(hash_servicios, id, &size);
+	TServicio* serv = _servicioDesdeBuf(buf, size);
+	free(buf);
+
+	return serv;
+}
+
+int Servicios_free(TServicio* this){
+	if(!this)
+		return 1;
+
+	free(this->nombre);
+	free(this->descripcion);
+	free(this);
+	return 0;
 }

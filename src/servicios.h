@@ -30,7 +30,7 @@ TServicio* Servicio_from_dni_prov(unsigned int dni_prov, unsigned int *id_p);
 
 /** Borra un servicio
  */
-TServicio* Servicio_del(unsigned int dni);
+TServicio* Servicio_del(unsigned int id);
 
 /** Metodos para obtener/modificar informacion del usuario.
  * Los sets devuelve 0 si salio todo bien.
