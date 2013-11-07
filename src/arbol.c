@@ -35,12 +35,6 @@ typedef struct {
 	char Junk[BLKSIZE - 2*sizeof(long)]; // Para que ocupe justo un bloque
 } HeadType;
 
-typedef struct {
-	long Pointers[BKTPTRS];
-	long NextBucket;
-} BucketType;
-
-
 static void ReadBlock(int File, long Block, int Size, void *Addr) {
 	if(lseek(File, Block * Size, SEEK_SET) == -1 ||
 			read(File, Addr, Size) == -1)
@@ -207,22 +201,6 @@ static int InsertKey(TArbolBM* arbol, TNodo *Node, int KIdx, long *Key, long *Pt
 	return Count2;
 }
 
-static long NewBucket(TArbolBM* arbol, long Ptr, long Next) {
-	long BBlk;
-	int j; 
-	BucketType Bucket;
-	Bucket.Pointers[0] = Ptr;
-	Bucket.Pointers[1] = -1;  
-	Bucket.NextBucket = Next;
-	//BBlk = Alloc(Index)++;
-	BBlk = arbol->AllocBlk++;
-	//WriteBlock(File(Index), BBlk, BLKSIZE, &Bucket);
-	WriteBlock(arbol->File, BBlk, BLKSIZE, &Bucket);
-	//WriteHead(Index);
-	WriteHead(arbol);
-	return BBlk;
-}
-
 /** 
  *
  * @param this[in]: instancia de arbol
@@ -274,7 +252,6 @@ int Arbol_insertar(TArbolBM* this, long Key, long Ptr){
 int main()  {
 
 	printf("BLKSIZE: '%d' sizeof(TNodo): '%d'\n", BLKSIZE, sizeof(TNodo));
-	BucketType Bucket;
 
 	/********************************************************************/
 	/* The main section of code should be replaced.                     */
@@ -283,7 +260,6 @@ int main()  {
 	/********************************************************************/
 
 	char Xname[8] = "arb.dat";
-	int  Xdupkeys; 
 	TArbolBM* XEntryNum; 
 	long XKey, XPtr;
 	int  RetnCode;
@@ -293,14 +269,13 @@ int main()  {
 
 	printf("start main\n");
 
-	Xdupkeys  = 0;
 
 	/********************************************************************/
 	/* read number of keys to insert, the number of keys  to search for */
 	/* and whether duplicates are allowed in the index                  */
 	/********************************************************************/
 
-	scanf("%d  %d  %d",&NumInsert, &NumLookup, &Xdupkeys);
+	scanf("%d  %d",&NumInsert, &NumLookup);
 
 	XEntryNum = Arbol_crear(Xname);
 
@@ -327,20 +302,8 @@ int main()  {
 		printf("%d",XKey);
 		printf("\n");
 		XPtr = Arbol_get(XEntryNum, XKey);
-		if (Xdupkeys == 0)  {  
-			printf("Key value is %d and Ptr value is %d\n", XKey, XPtr);
-		} 
-		else 
-			printf("Key value is %d\n", XKey);  
-
-		if (Xdupkeys == 1) { 
-			j = 0;  
-			while (Bucket.Pointers[j] != -1)  { 
-				printf("Ptr value is %d\n", Bucket.Pointers[j]); 
-				j++; 
-			} 
-		}    
-	}  
+		printf("Key value is %d and Ptr value is %d\n", XKey, XPtr);
+	}
 
 
 	Arbol_destruir(XEntryNum);
