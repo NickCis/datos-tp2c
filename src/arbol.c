@@ -1,10 +1,12 @@
 // http://forums.codeguru.com/showthread.php?453150-B-Tree-C-Implementation
+// gcc arbol.c archivo_bloque.c bloque.c -o arbol
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <string.h>
 #include <stdlib.h>
 #include "arbolbmas.h"
+#include "archivo_bloque.h"
 
 #define ORDER 64
 #define BLKSIZE (ORDER*8)
@@ -12,14 +14,16 @@
 #define SEEK_SET  0
 
 struct TArbolBM {
-	int File;
+	//int File;
+	TArchivo* arch;
 	char *path;
-	//int DupKeys;
-	long RootBlk;
-	long AllocBlk;
-	long CurBlk;
-	short CurKey;
-	short CurPtr;
+	long root_bloque;
+	long alloc_bloque;
+	long corriente_bloque;
+	short corriente_llave;
+	short corriente_ptr;
+	TArbolId get_id;
+	size_t block_size;
 };
 
 typedef struct {
@@ -29,75 +33,103 @@ typedef struct {
 	long Ptrs[ORDER];
 } TNodo;
 
-typedef struct {
-	long RootBlock;
-	long AllocBlock;
-	char Junk[BLKSIZE - 2*sizeof(long)]; // Para que ocupe justo un bloque
-} HeadType;
-
-static void ReadBlock(int File, long Block, int Size, void *Addr) {
+/*static void ReadBlock(int File, long Block, int Size, void *Addr) {
 	if(lseek(File, Block * Size, SEEK_SET) == -1 ||
 			read(File, Addr, Size) == -1)
 		printf("ReadBlock Error, File %d, Block %d, Size %d\n",
 			File, Block, Size);
+}*/
+
+static void _leerNodo(TArbolBM * this, size_t bloque, void* data, size_t * size) {
+	// TODO: checkear errores
+	size_t size_read = 0;
+	Archivo_bloque_seek(this->arch, bloque, SEEK_SET);
+	Archivo_bloque_leer(this->arch);
+	uint8_t *aux = Archivo_get_bloque_buf(this->arch, &size_read);
+	memcpy(data, aux, size_read);
+	*size = size_read;
+	free(aux);
 }
 
-static void WriteBlock(int File, long Block, int Size, void *Addr) {
+/*static void WriteBlock(int File, long Block, int Size, void *Addr) {
 	if(lseek(File, Block * Size, SEEK_SET) == -1 ||
 			write(File, Addr, Size) == -1)
 		printf("WriteBlock Error, File %d, Block %d, Size %d\n",
 			File, Block, Size);
+}*/
+
+static void _escribirNodo(TArbolBM * this, size_t bloque, void* data, size_t size) {
+	// TODO: checkear errores
+	Archivo_bloque_seek(this->arch, bloque, SEEK_SET);
+	Archivo_bloque_new(this->arch);
+	Archivo_bloque_agregar_buf(this->arch, data, size);
+	Archivo_flush(this->arch);
+
 }
 
-static void ReadHead(TArbolBM *arbol) {
-	HeadType HeadBlock;
-	ReadBlock(arbol->File, 0, BLKSIZE, &HeadBlock);
-	arbol->RootBlk = HeadBlock.RootBlock;
-	arbol->AllocBlk = HeadBlock.AllocBlock;
+static void _leerCabecera(TArbolBM *this) {
+	// TODO: checkear errores
+	size_t size;
+
+	Archivo_bloque_seek(this->arch, 0, SEEK_SET);
+	Archivo_bloque_leer(this->arch);
+
+	long *aux = Archivo_get_bloque_buf(this->arch, &size);
+	this->root_bloque = *aux;
+	free(aux);
+
+	aux = Archivo_get_bloque_buf(this->arch, &size);
+	this->alloc_bloque = *aux;
+	free(aux);
 }
 
-static void WriteHead(TArbolBM *arbol) {
-	HeadType HeadBlock;
-	HeadBlock.RootBlock = arbol->RootBlk;
-	HeadBlock.AllocBlock = arbol->AllocBlk;
-	WriteBlock(arbol->File, 0, BLKSIZE, &HeadBlock);
+static void _escribirCabecera(TArbolBM *this) {
+	// TODO: checkear errores
+	Archivo_bloque_seek(this->arch, 0, SEEK_SET);
+	Archivo_bloque_new(this->arch);
+	Archivo_bloque_agregar_buf(this->arch, &(this->root_bloque), sizeof(long));
+	Archivo_bloque_agregar_buf(this->arch, &(this->alloc_bloque), sizeof(long));
+	Archivo_flush(this->arch);
 }
 
-TArbolBM* Arbol_crear(char *path) {
+TArbolBM* Arbol_crear(char *path, size_t block_size, TArbolId get_id){
 	int j;
 	TArbolBM * this = (TArbolBM*) calloc(1, sizeof(TArbolBM));
 
 	this->path = strcpy(malloc(strlen(path)+1), path);
-	this->CurBlk = -1;
+	this->corriente_bloque = -1;
+	this->get_id = get_id;
+	this->block_size = block_size;
 
-	if((this->File = open(path, O_RDWR)) >= 0) {
-		ReadHead(this);
-	} else
-		if((this->File = open(path, O_RDWR|O_CREAT, 0644)) >= 0) { 
-			TNodo Node;
-			this->RootBlk = 1;
-			this->AllocBlk = 2;
-			WriteHead(this);
-			Node.LeafNode = 1;
-			Node.KeyCount = 0;
-			for(j = 0; j < ORDER-1; j++)
-			{ 
-				Node.Ptrs[j] = -1; 
-				Node.Keys[j] = 0; 
-			}  
-			Node.Ptrs[ORDER - 1] = -1;
-			WriteBlock(this->File, 1, BLKSIZE, &Node);
-		} else {
-			perror("OpenIndex");
-			free(this);
-			this = NULL;
-		}
+	this->arch = Archivo_crear(path, block_size);
+
+	//if((this->File = open(path, O_RDWR)) >= 0) {
+	if(Archivo_cant_bloque(this->arch)){
+		_leerCabecera(this);
+	} else{
+		TNodo Node;
+		this->root_bloque = 1;
+		this->alloc_bloque = 2;
+		_escribirCabecera(this);
+		Node.LeafNode = 1;
+		Node.KeyCount = 0;
+		for(j = 0; j < ORDER-1; j++)
+		{ 
+			Node.Ptrs[j] = -1; 
+			Node.Keys[j] = 0; 
+		}  
+		Node.Ptrs[ORDER - 1] = -1;
+		//WriteBlock(this->File, 1, BLKSIZE, &Node);
+		_escribirNodo(this, 1, &Node, sizeof(TNodo));
+
+	}
 	return this;
 }
 
 void Arbol_destruir(TArbolBM* this){
-	WriteHead(this);
-	close(this->File);
+	// TODO: cerrar arch
+	_escribirCabecera(this);
+	Archivo_destruir(this->arch);
 	free(this->path);
 	free(this);
 }
@@ -113,19 +145,19 @@ static int FindKey(TNodo *nodo, long id) {
 	return k;
 }
 
-static void CheckBucket(TArbolBM* arbol, TNodo *Node, long *Key, long *Ptr) {
+static void CheckBucket(TArbolBM* this, TNodo *Node, long *Key, long *Ptr) {
 	*Ptr = -1;
-	if(arbol->CurBlk >= 0) {
+	if(this->corriente_bloque >= 0) {
 		long NextPtr;
-		*Key = Node->Keys[arbol->CurKey-1];
-		*Ptr = Node->Ptrs[arbol->CurKey];
+		*Key = Node->Keys[this->corriente_llave-1];
+		*Ptr = Node->Ptrs[this->corriente_llave];
 
 		if( NextPtr < 0) {
-			arbol->CurPtr = 0;
-			arbol->CurKey++;
-			if(arbol->CurKey > Node->KeyCount) {
-				arbol->CurBlk = Node->Ptrs[0];
-				arbol->CurKey = 1;
+			this->corriente_ptr = 0;
+			this->corriente_llave++;
+			if(this->corriente_llave > Node->KeyCount) {
+				this->corriente_bloque = Node->Ptrs[0];
+				this->corriente_llave = 1;
 			}
 		}
 	}
@@ -134,27 +166,28 @@ static void CheckBucket(TArbolBM* arbol, TNodo *Node, long *Key, long *Ptr) {
 long Arbol_get(TArbolBM* this, long id) {
 	TNodo Node;
 	long Ptr;
-	this->CurBlk = this->RootBlk; // Seteo bloque correinte como raiz
+	this->corriente_bloque = this->root_bloque; // Seteo bloque correinte como raiz
 	for(;;) {
-		ReadBlock(this->File, this->CurBlk, BLKSIZE, &Node);
-		this->CurKey = FindKey(&Node, id);
+		size_t size = sizeof(TNodo);
+		_leerNodo(this, this->corriente_bloque, &Node, &size);
+		this->corriente_llave = FindKey(&Node, id);
 
 		if(Node.LeafNode)
 			break;
 
-		this->CurBlk = Node.Ptrs[this->CurKey];
+		this->corriente_bloque = Node.Ptrs[this->corriente_llave];
 	}
-	this->CurPtr = 0;
+	this->corriente_ptr = 0;
 
-	if(this->CurKey == 0)
-		this->CurBlk = -1;
+	if(this->corriente_llave == 0)
+		this->corriente_bloque = -1;
 
 	CheckBucket(this, &Node, &id, &Ptr);
 
 	return Ptr;
 }
 
-static int InsertKey(TArbolBM* arbol, TNodo *Node, int KIdx, long *Key, long *Ptr) {
+static int InsertKey(TArbolBM* this, TNodo *Node, int KIdx, long *Key, long *Ptr) {
 	long Keys[ORDER], Ptrs[ORDER+1];
 	int Count, Count1, Count2, k;
 	Count = Node->KeyCount + 1;
@@ -187,16 +220,15 @@ static int InsertKey(TArbolBM* arbol, TNodo *Node, int KIdx, long *Key, long *Pt
 		NNode.Ptrs[d] = Ptrs[s];
 		NNode.KeyCount = Count2;
 		*Key = Keys[ORDER/2];
-		//*Ptr = Alloc(Index)++;
-		*Ptr = arbol->AllocBlk++;
+		*Ptr = this->alloc_bloque++;
 		if(Node->LeafNode) {  /* insert in sequential linked list */
 			NNode.Ptrs[0] = Node->Ptrs[0];
 			Node->Ptrs[0] = *Ptr;
 		}
-		//WriteBlock(File(Index), *Ptr, BLKSIZE, &NNode);
-		WriteBlock(arbol->File, *Ptr, BLKSIZE, &NNode);
+		//WriteBlock(arbol->File, *Ptr, BLKSIZE, &NNode);
+		_escribirNodo(this, *Ptr, &NNode, sizeof(TNodo));
 		//WriteHead(Index);
-		WriteHead(arbol);
+		_escribirCabecera(this);
 	}
 	return Count2;
 }
@@ -211,8 +243,10 @@ static int RecInsert(TArbolBM* this, long Block, long *Key, long *Ptr, int *erro
 	TNodo nodo;
 	int KIdx, Split = 0;
 	int EqualKey;
+	size_t size = sizeof(TNodo);
 
-	ReadBlock(this->File, Block, BLKSIZE, &nodo);
+	//ReadBlock(this->File, Block, BLKSIZE, &nodo);
+	_leerNodo(this, Block, &nodo, &size);
 	KIdx = FindKey(&nodo, *Key);
 	EqualKey = KIdx && nodo.Keys[KIdx-1] == *Key;
 
@@ -221,7 +255,8 @@ static int RecInsert(TArbolBM* this, long Block, long *Key, long *Ptr, int *erro
 
 	if(Split || nodo.LeafNode && !EqualKey) {
 		Split = InsertKey(this, &nodo, KIdx, Key, Ptr);
-		WriteBlock(this->File, Block, BLKSIZE, &nodo);
+		//WriteBlock(this->File, Block, BLKSIZE, &nodo);
+		_escribirNodo(this, Block, &nodo, BLKSIZE);
 	} else if(nodo.LeafNode) {
 		*error = -1;
 	}
@@ -232,7 +267,7 @@ int Arbol_insertar(TArbolBM* this, long Key, long Ptr){
 	int Split;
 	int error = 0;
 
-	Split = RecInsert(this, this->RootBlk, &Key, &Ptr, &error);
+	Split = RecInsert(this, this->root_bloque, &Key, &Ptr, &error);
 
 	if(Split) {
 		TNodo Node;
@@ -240,12 +275,12 @@ int Arbol_insertar(TArbolBM* this, long Key, long Ptr){
 		Node.KeyCount = 1;
 		Node.Keys[0] = Key;
 		Node.Ptrs[1] = Ptr;
-		Node.Ptrs[0] = this->RootBlk;
-		this->RootBlk = this->AllocBlk++;
-		WriteBlock(this->File, this->RootBlk, BLKSIZE, &Node);
-		WriteHead(this);
+		Node.Ptrs[0] = this->root_bloque;
+		this->root_bloque = this->alloc_bloque++;
+		_escribirNodo(this, this->root_bloque, &Node, sizeof(TNodo));
+		_escribirCabecera(this);
 	}
-	this->CurBlk = -1;
+	this->corriente_bloque = -1;
 	return error;
 }
 
@@ -259,7 +294,7 @@ int main()  {
 	/* into a B+ tree and then retrieved                                */
 	/********************************************************************/
 
-	char Xname[8] = "arb.dat";
+	//char Xname[8] = "arb.dat";
 	TArbolBM* XEntryNum; 
 	long XKey, XPtr;
 	int  RetnCode;
@@ -277,7 +312,7 @@ int main()  {
 
 	scanf("%d  %d",&NumInsert, &NumLookup);
 
-	XEntryNum = Arbol_crear(Xname);
+	XEntryNum = Arbol_crear("arbol_data.dat", 1024, NULL);
 
 	for(i = 0; i < NumInsert; i++){
 		printf("Insert KEY, PTR:");

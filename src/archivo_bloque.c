@@ -351,3 +351,9 @@ int Archivo_libre(TArchivo* this, size_t n_bloque){
 int Archivo_get_cur_bloque(TArchivo* this){
 	return this->cur_bloque;
 }
+
+size_t Archivo_cant_bloque(TArchivo* this){
+	if(!this)
+		return 0;
+	return this->cant_bloque;
+}

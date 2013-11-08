@@ -182,4 +182,10 @@ int Archivo_get_cur_bloque(TArchivo* this);
  */
 int Archivo_destruir(TArchivo* this);
 
+/** Devuelve cantidad de bloques que tiene el archivo
+ * @param TArchivo* this: instancia de archivo de bloques
+ * @return cantidad de bloque
+ */
+size_t Archivo_cant_bloque(TArchivo* this);
+
 #endif
