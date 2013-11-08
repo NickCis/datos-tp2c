@@ -14,7 +14,7 @@ RM:= rm -fr
 
 .PHONY: clean all test main
 
-all: main
+all: main creador_admin
 
 test: $(o_files);
 	- mkdir test
@@ -35,4 +35,4 @@ main: $(o_files_no_main) main.o
 	$(CC) $(LDFLAGS) $(CFLAGS) main.o $(o_files_no_main) -o $@
 
 clean:
-	$(RM) *.o test/ main
+	$(RM) *.o test/ main creador_admin

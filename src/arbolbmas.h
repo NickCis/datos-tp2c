@@ -5,14 +5,7 @@
 
 typedef struct TArbolBM TArbolBM;
 
-/** Funcion que recibe un elemento y devuelve el id del mismo
- * @param ele: buffer del elemento
- * @param size: tama~no del buffer
- * @return id del elemento
- */
-typedef unsigned int(*TArbolId)(uint8_t* ele, size_t size);
-
-TArbolBM* Arbol_crear(char *path, size_t block_size, TArbolId get_id);
+TArbolBM* Arbol_crear(char *path, size_t order);
 /* open or create index file, find free entry in index table,
     fill in entry, DupKeys is 1 if duplicate keys are allowed, 0 if not,
     return number of entry in table */
