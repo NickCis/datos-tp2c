@@ -19,6 +19,8 @@ int Arbol_insertar(TArbolBM* this, long Key, long Ptr);
 long Arbol_get(TArbolBM* this, long Key);
 /* return pointer for entry in Index file <= Key, return -1 if none */
 
+int Arbol_remover(TArbolBM* this, long id);
+
 
 
 #endif

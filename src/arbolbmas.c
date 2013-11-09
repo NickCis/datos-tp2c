@@ -13,7 +13,7 @@ struct TArbolBM {
 	long root_bloque;
 	long alloc_bloque;
 	long corriente_bloque;
-	short corriente_llave;
+	short corriente_id;
 	short corriente_ptr;
 	size_t block_size;
 	size_t order;
@@ -168,15 +168,15 @@ static void buscarEnNodo(TArbolBM* this, TNodo *nodo, long *id, long *ptr) {
 	*ptr = -1;
 	if(this->corriente_bloque >= 0) {
 		long sig_ptr = 0;
-		*id = nodo->ids[this->corriente_llave-1];
-		*ptr = nodo->ptrs[this->corriente_llave];
+		*id = nodo->ids[this->corriente_id-1];
+		*ptr = nodo->ptrs[this->corriente_id];
 
 		if( sig_ptr < 0) {
 			this->corriente_ptr = 0;
-			this->corriente_llave++;
-			if(this->corriente_llave > nodo->cant) {
+			this->corriente_id++;
+			if(this->corriente_id > nodo->cant) {
 				this->corriente_bloque = nodo->ptrs[0];
-				this->corriente_llave = 1;
+				this->corriente_id = 1;
 			}
 		}
 	}
@@ -184,26 +184,26 @@ static void buscarEnNodo(TArbolBM* this, TNodo *nodo, long *id, long *ptr) {
 
 long Arbol_get(TArbolBM* this, long id) {
 	TNodo *nodo = _nodo_malloc(this);
-	long Ptr = 0;
+	long ptr = 0;
 	this->corriente_bloque = this->root_bloque; // Seteo bloque correinte como raiz
 	for(;;) {
 		_leerNodo(this, this->corriente_bloque, nodo);
-		this->corriente_llave = buscarId(nodo, id);
+		this->corriente_id = buscarId(nodo, id);
 
 		if(nodo->hoja)
 			break;
 
-		this->corriente_bloque = nodo->ptrs[this->corriente_llave];
+		this->corriente_bloque = nodo->ptrs[this->corriente_id];
 	}
 	this->corriente_ptr = 0;
 
-	if(this->corriente_llave == 0)
+	if(this->corriente_id == 0)
 		this->corriente_bloque = -1;
 
-	buscarEnNodo(this, nodo, &id, &Ptr);
+	buscarEnNodo(this, nodo, &id, &ptr);
 
 	_nodo_free(nodo);
-	return Ptr;
+	return ptr;
 }
 
 static int _insertarId(TArbolBM* this, TNodo *nodo, int k_id, long *id, long *ptr) {
@@ -251,13 +251,13 @@ static int _insertarId(TArbolBM* this, TNodo *nodo, int k_id, long *id, long *pt
 	return count2;
 }
 
-/** 
+/**
  *
  * @param this[in]: instancia de arbol
  * @param block[in]: numero de bloque
- * @param *Key
+ * @param *id
  */
-static int recInsertar(TArbolBM* this, long block, long *id, long *ptr, int *error) {
+static int _recInsertar(TArbolBM* this, long block, long *id, long *ptr, int *error) {
 	TNodo *nodo = _nodo_malloc(this);
 	int k_id, dividir = 0;
 	int misma_id;
@@ -267,7 +267,7 @@ static int recInsertar(TArbolBM* this, long block, long *id, long *ptr, int *err
 	misma_id = k_id && nodo->ids[k_id-1] == *id;
 
 	if(!nodo->hoja)
-		dividir = recInsertar(this, nodo->ptrs[k_id], id, ptr, error);
+		dividir = _recInsertar(this, nodo->ptrs[k_id], id, ptr, error);
 
 	if(dividir || (nodo->hoja && !misma_id)) {
 		dividir = _insertarId(this, nodo, k_id, id, ptr);
@@ -284,7 +284,7 @@ int Arbol_insertar(TArbolBM* this, long id, long ptr){
 	int dividir;
 	int error = 0;
 
-	dividir = recInsertar(this, this->root_bloque, &id, &ptr, &error);
+	dividir = _recInsertar(this, this->root_bloque, &id, &ptr, &error);
 
 	if(dividir) {
 		TNodo* nodo = _nodo_malloc(this);
@@ -300,4 +300,33 @@ int Arbol_insertar(TArbolBM* this, long id, long ptr){
 	}
 	this->corriente_bloque = -1;
 	return error;
+}
+
+/** Remover elemento.
+ * 1) Arranco desde raiz, y busco hoja L donde pertence
+ * 2) Remuevo elemento
+ * 3) 
+ */
+int Arbol_remover(TArbolBM* this, long id){
+	TNodo *nodo = _nodo_malloc(this);
+
+	this->corriente_bloque = this->root_bloque; // Seteo bloque correinte como raiz
+	for(;;) {
+		_leerNodo(this, this->corriente_bloque, nodo);
+		this->corriente_id = buscarId(nodo, id);
+
+		if(nodo->hoja)
+			break;
+
+		this->corriente_bloque = nodo->ptrs[this->corriente_id];
+	}
+	this->corriente_ptr = 0;
+	// this->corriente_bloque es la hoja donde esta
+	int i;
+	for(i=0; i < this->order - 1; i++){
+		printf("leaf %d nodo->ids[%d] %ld nodo->ptrs[%d] %ld\n", nodo->hoja, i,  nodo->ids[i], i, nodo->ptrs[i]);
+	}
+	printf("nodo->ptrs[63] %ld\n", nodo->ptrs[63]);
+	_nodo_free(nodo);
+	return 0;
 }

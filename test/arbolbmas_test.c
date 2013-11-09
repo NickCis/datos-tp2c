@@ -7,11 +7,11 @@ int main()  {
 	int  ret;
 	int  i;
 
-	int insertar, buscar;
+	int insertar, buscar, eliminar;
 
 	printf("Ingrese la cantidad de inserciones que se quiere hacer, dejar un espacio y la cantidad de busquedas\n");
 
-	scanf("%d  %d", &insertar, &buscar);
+	scanf("%d  %d %d", &insertar, &buscar, &eliminar);
 
 	arbol = Arbol_crear("arbol_data.dat", ORDER);
 
@@ -36,6 +36,13 @@ int main()  {
 		printf("\n");
 		ptr = Arbol_get(arbol, id);
 		printf("Key value is %ld and Ptr value is %ld\n", id, ptr);
+	}
+
+	for(i=0; i < eliminar; i++){
+		printf("Eliminar id:");
+		scanf("%ld", &id);
+		printf("%ld", id);
+		Arbol_remover(arbol, id);
 	}
 
 
