@@ -76,7 +76,6 @@ static void _escribirNodo(TArbolBM * this, size_t bloque, TNodo* nodo) {
 	data.buf = (uint8_t*) nodo->ptrs;
 	buf =  Serializador_pack(buf, SER_FIX_BUF, &data, &size);
 
-	//if(Archivo_bloque_agregar_buf(this->arch, buf, size)){
 	if(ArchivoFijo_agregar_buf(this->arch, buf)){
 		printf("error agregandoooo\n");
 	}
@@ -94,9 +93,7 @@ static void _leerCabecera(TArbolBM *this) {
 
 	long *aux = (long*) Archivo_get_bloque_buf(this->arch, &size);
 	this->root_bloque = aux[0];
-	//free(aux);
 
-	//aux = (long*) Archivo_get_bloque_buf(this->arch, &size);
 	this->alloc_bloque = aux[1];
 	free(aux);
 }
@@ -106,8 +103,6 @@ static void _escribirCabecera(TArbolBM *this) {
 	long data[2* this->order];
 	Archivo_bloque_seek(this->arch, 0, SEEK_SET);
 	Archivo_bloque_new(this->arch);
-	//Archivo_bloque_agregar_buf(this->arch, (uint8_t*) &(this->root_bloque), sizeof(long));
-	//Archivo_bloque_agregar_buf(this->arch, (uint8_t*) &(this->alloc_bloque), sizeof(long));
 	data[0] = this->root_bloque;
 	data[1] = this->alloc_bloque;
 	if(ArchivoFijo_agregar_buf(this->arch, (uint8_t*) data)){
@@ -160,7 +155,7 @@ void Arbol_destruir(TArbolBM* this){
 
 /** Devuelve indice de id (en array).
  */
-static int FindKey(TNodo *nodo, long id) {
+static int buscarId(TNodo *nodo, long id) {
 	int k;
 	for(k = 0; k < nodo->cant; k++)
 		if(nodo->ids[k] > id)
@@ -169,18 +164,18 @@ static int FindKey(TNodo *nodo, long id) {
 	return k;
 }
 
-static void CheckBucket(TArbolBM* this, TNodo *Node, long *Key, long *Ptr) {
-	*Ptr = -1;
+static void buscarEnNodo(TArbolBM* this, TNodo *nodo, long *id, long *ptr) {
+	*ptr = -1;
 	if(this->corriente_bloque >= 0) {
-		long NextPtr = 0;
-		*Key = Node->ids[this->corriente_llave-1];
-		*Ptr = Node->ptrs[this->corriente_llave];
+		long sig_ptr = 0;
+		*id = nodo->ids[this->corriente_llave-1];
+		*ptr = nodo->ptrs[this->corriente_llave];
 
-		if( NextPtr < 0) {
+		if( sig_ptr < 0) {
 			this->corriente_ptr = 0;
 			this->corriente_llave++;
-			if(this->corriente_llave > Node->cant) {
-				this->corriente_bloque = Node->ptrs[0];
+			if(this->corriente_llave > nodo->cant) {
+				this->corriente_bloque = nodo->ptrs[0];
 				this->corriente_llave = 1;
 			}
 		}
@@ -193,7 +188,7 @@ long Arbol_get(TArbolBM* this, long id) {
 	this->corriente_bloque = this->root_bloque; // Seteo bloque correinte como raiz
 	for(;;) {
 		_leerNodo(this, this->corriente_bloque, nodo);
-		this->corriente_llave = FindKey(nodo, id);
+		this->corriente_llave = buscarId(nodo, id);
 
 		if(nodo->hoja)
 			break;
@@ -205,98 +200,98 @@ long Arbol_get(TArbolBM* this, long id) {
 	if(this->corriente_llave == 0)
 		this->corriente_bloque = -1;
 
-	CheckBucket(this, nodo, &id, &Ptr);
+	buscarEnNodo(this, nodo, &id, &Ptr);
 
 	_nodo_free(nodo);
 	return Ptr;
 }
 
-static int InsertKey(TArbolBM* this, TNodo *nodo, int KIdx, long *Key, long *Ptr) {
+static int _insertarId(TArbolBM* this, TNodo *nodo, int k_id, long *id, long *ptr) {
 	long ids[this->order], ptrs[this->order+1];
-	int Count, Count1, Count2, k;
-	Count = nodo->cant + 1;
-	Count1 = Count < this->order ? Count : this->order/2;
-	Count2 = Count - Count1;
-	for(k = this->order/2; k < KIdx; k++) {
+	int count, count1, count2, k;
+	count = nodo->cant + 1;
+	count1 = count < this->order ? count : this->order/2;
+	count2 = count - count1;
+	for(k = this->order/2; k < k_id; k++) {
 		ids[k] = nodo->ids[k];
 		ptrs[k+1] = nodo->ptrs[k+1];
 	}
-	ids[KIdx] = *Key;
-	ptrs[KIdx+1] = *Ptr;
-	for(k = KIdx; k < nodo->cant; k++) {
+	ids[k_id] = *id;
+	ptrs[k_id+1] = *ptr;
+	for(k = k_id; k < nodo->cant; k++) {
 		ids[k+1] = nodo->ids[k];
 		ptrs[k+2] = nodo->ptrs[k+1];
 	}
-	for(k = KIdx; k < Count1; k++) {
+	for(k = k_id; k < count1; k++) {
 		nodo->ids[k] = ids[k];
 		nodo->ptrs[k+1] = ptrs[k+1];
 	}
-	nodo->cant = Count1;
-	if(Count2) {
+	nodo->cant = count1;
+	if(count2) {
 		int s, d;
 		TNodo* nnodo = _nodo_malloc(this);
 		nnodo->hoja = nodo->hoja;
-		Count2 -= !nodo->hoja;
-		for(s = this->order/2 + !nodo->hoja, d = 0; d < Count2; s++, d++) {
+		count2 -= !nodo->hoja;
+		for(s = this->order/2 + !nodo->hoja, d = 0; d < count2; s++, d++) {
 			nnodo->ids[d] = ids[s];
 			nnodo->ptrs[d] = ptrs[s];
 		}
 		nnodo->ptrs[d] = ptrs[s];
-		nnodo->cant = Count2;
-		*Key = ids[this->order/2];
-		*Ptr = this->alloc_bloque++;
+		nnodo->cant = count2;
+		*id = ids[this->order/2];
+		*ptr = this->alloc_bloque++;
 		if(nodo->hoja) {  /* insert in sequential linked list */
 			nnodo->ptrs[0] = nodo->ptrs[0];
-			nodo->ptrs[0] = *Ptr;
+			nodo->ptrs[0] = *ptr;
 		}
-		_escribirNodo(this, *Ptr, nnodo);
+		_escribirNodo(this, *ptr, nnodo);
 		_escribirCabecera(this);
 		_nodo_free(nnodo);
 	}
-	return Count2;
+	return count2;
 }
 
 /** 
  *
  * @param this[in]: instancia de arbol
- * @param Block[in]: numero de bloque
+ * @param block[in]: numero de bloque
  * @param *Key
  */
-static int RecInsert(TArbolBM* this, long Block, long *Key, long *Ptr, int *error) {
+static int recInsertar(TArbolBM* this, long block, long *id, long *ptr, int *error) {
 	TNodo *nodo = _nodo_malloc(this);
-	int KIdx, Split = 0;
-	int EqualKey;
+	int k_id, dividir = 0;
+	int misma_id;
 
-	_leerNodo(this, Block, nodo);
-	KIdx = FindKey(nodo, *Key);
-	EqualKey = KIdx && nodo->ids[KIdx-1] == *Key;
+	_leerNodo(this, block, nodo);
+	k_id = buscarId(nodo, *id);
+	misma_id = k_id && nodo->ids[k_id-1] == *id;
 
 	if(!nodo->hoja)
-		Split = RecInsert(this, nodo->ptrs[KIdx], Key, Ptr, error);
+		dividir = recInsertar(this, nodo->ptrs[k_id], id, ptr, error);
 
-	if(Split || (nodo->hoja && !EqualKey)) {
-		Split = InsertKey(this, nodo, KIdx, Key, Ptr);
-		_escribirNodo(this, Block, nodo);
+	if(dividir || (nodo->hoja && !misma_id)) {
+		dividir = _insertarId(this, nodo, k_id, id, ptr);
+		_escribirNodo(this, block, nodo);
 	} else if(nodo->hoja) {
 		*error = -1;
 	}
 
 	_nodo_free(nodo);
-	return Split;
+	return dividir;
 }
 
-int Arbol_insertar(TArbolBM* this, long Key, long Ptr){
-	int Split;
+int Arbol_insertar(TArbolBM* this, long id, long ptr){
+	int dividir;
 	int error = 0;
 
-	Split = RecInsert(this, this->root_bloque, &Key, &Ptr, &error);
+	dividir = recInsertar(this, this->root_bloque, &id, &ptr, &error);
 
-	if(Split) {
+	if(dividir) {
 		TNodo* nodo = _nodo_malloc(this);
 		nodo->hoja = 0;
 		nodo->cant = 1;
-		nodo->ids[0] = Key;
-		nodo->ptrs[1] = Ptr;
+		nodo->ids[0] = id;
+		nodo->ptrs[1] = ptr;
 		nodo->ptrs[0] = this->root_bloque;
 		this->root_bloque = this->alloc_bloque++;
 		_escribirNodo(this, this->root_bloque, nodo);
