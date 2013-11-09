@@ -16,9 +16,16 @@ struct TArbolBM {
 	short corriente_id;
 	short corriente_ptr;
 	size_t block_size;
-	size_t order;
+	size_t orden;
 };
 
+/** Si es hoja, primer elemnto de ptr es el numero del bloque del siguiente bloque, segun orden de id, o -1 si es el ultimo bloque.
+ * Si no es hoja, la estructura es:
+ *        ids[0]    ids[1]
+ *  ptrs[0] | ptrs[1] | ptrs[2]
+ * con ptrs[n] numero de bloque.
+ * cant tiene el largo del array ids (siempre ptrs va a tener de largo cant +1)
+ */
 typedef struct {
 	short hoja;
 	short cant;
@@ -28,8 +35,8 @@ typedef struct {
 
 static TNodo* _nodo_malloc(TArbolBM * this){
 	TNodo* nodo = (TNodo*) malloc(sizeof(TNodo));
-	nodo->ids = (long*) malloc(sizeof(long) * (this->order-1));
-	nodo->ptrs = (long*) malloc(sizeof(long) * this->order);
+	nodo->ids = (long*) malloc(sizeof(long) * (this->orden-1));
+	nodo->ptrs = (long*) malloc(sizeof(long) * this->orden);
 	return nodo;
 }
 
@@ -48,8 +55,8 @@ static void _leerNodo(TArbolBM * this, size_t bloque, TNodo* nodo) {
 	nodo->hoja = aux[0];
 	nodo->cant = aux[1];
 	uint8_t* aux_ptr = (uint8_t*) &(aux[2]);
-	memcpy(nodo->ids, aux_ptr, sizeof(long) * (this->order-1));
-	memcpy(nodo->ptrs, aux_ptr+sizeof(long) * (this->order-1), sizeof(long) * this->order);
+	memcpy(nodo->ids, aux_ptr, sizeof(long) * (this->orden-1));
+	memcpy(nodo->ptrs, aux_ptr+sizeof(long) * (this->orden-1), sizeof(long) * this->orden);
 	free(aux);
 }
 
@@ -68,7 +75,7 @@ static void _escribirNodo(TArbolBM * this, size_t bloque, TNodo* nodo) {
 	data.buf = (uint8_t*) &(nodo->cant);
 	buf =  Serializador_pack(buf, SER_FIX_BUF, &data, &size);
 
-	data.size = sizeof(long) * (this->order -1 );
+	data.size = sizeof(long) * (this->orden -1 );
 	data.buf = (uint8_t*) nodo->ids;
 	buf =  Serializador_pack(buf, SER_FIX_BUF, &data, &size);
 
@@ -100,7 +107,7 @@ static void _leerCabecera(TArbolBM *this) {
 
 static void _escribirCabecera(TArbolBM *this) {
 	// TODO: checkear errores
-	long data[2* this->order];
+	long data[2* this->orden];
 	Archivo_bloque_seek(this->arch, 0, SEEK_SET);
 	Archivo_bloque_new(this->arch);
 	data[0] = this->root_bloque;
@@ -111,15 +118,15 @@ static void _escribirCabecera(TArbolBM *this) {
 	Archivo_flush(this->arch);
 }
 
-TArbolBM* Arbol_crear(char *path, size_t order){
+TArbolBM* Arbol_crear(char *path, size_t orden){
 	int j;
 	TArbolBM * this = (TArbolBM*) calloc(1, sizeof(TArbolBM));
 
 	this->path = strcpy(malloc(strlen(path)+1), path);
 	this->corriente_bloque = -1;
-	this->order = order;
+	this->orden = orden;
 	// 4 * orden para punteros + 4 * (ordern -1) para llaves + (2) es hoja + (2) cuenta de llaves + 4 prefijo longitud
-	this->block_size = 2 * order * sizeof(long) +  sizeof(size_t);
+	this->block_size = 2 * orden * sizeof(long) +  sizeof(size_t);
 
 	this->arch = ArchivoFijo_crear(path, this->block_size, this->block_size - sizeof(size_t));
 
@@ -132,12 +139,12 @@ TArbolBM* Arbol_crear(char *path, size_t order){
 		_escribirCabecera(this);
 		nodo->hoja = 1;
 		nodo->cant = 0;
-		for(j = 0; j < order-1; j++)
+		for(j = 0; j < orden-1; j++)
 		{ 
 			nodo->ptrs[j] = -1; 
 			nodo->ids[j] = 0; 
 		}  
-		nodo->ptrs[order - 1] = -1;
+		nodo->ptrs[orden - 1] = -1;
 		_escribirNodo(this, 1, nodo);
 		_nodo_free(nodo);
 
@@ -155,7 +162,7 @@ void Arbol_destruir(TArbolBM* this){
 
 /** Devuelve indice de id (en array).
  */
-static int buscarId(TNodo *nodo, long id) {
+static int _buscarIdAprox(TNodo *nodo, long id) {
 	int k;
 	for(k = 0; k < nodo->cant; k++)
 		if(nodo->ids[k] > id)
@@ -164,7 +171,16 @@ static int buscarId(TNodo *nodo, long id) {
 	return k;
 }
 
-static void buscarEnNodo(TArbolBM* this, TNodo *nodo, long *id, long *ptr) {
+static int _buscarIdExact(TNodo *nodo, long id) {
+	int k;
+	for(k = 0; k < nodo->cant; k++)
+		if(nodo->ids[k] == id)
+			return k;
+
+	return -1;
+}
+
+static void _buscarEnNodo(TArbolBM* this, TNodo *nodo, long *id, long *ptr) {
 	*ptr = -1;
 	if(this->corriente_bloque >= 0) {
 		long sig_ptr = 0;
@@ -182,13 +198,13 @@ static void buscarEnNodo(TArbolBM* this, TNodo *nodo, long *id, long *ptr) {
 	}
 }
 
-long Arbol_get(TArbolBM* this, long id) {
+int Arbol_get(TArbolBM* this, long id, long* ptr) {
 	TNodo *nodo = _nodo_malloc(this);
-	long ptr = 0;
+	*ptr = 0;
 	this->corriente_bloque = this->root_bloque; // Seteo bloque correinte como raiz
 	for(;;) {
 		_leerNodo(this, this->corriente_bloque, nodo);
-		this->corriente_id = buscarId(nodo, id);
+		this->corriente_id = _buscarIdAprox(nodo, id);
 
 		if(nodo->hoja)
 			break;
@@ -197,22 +213,23 @@ long Arbol_get(TArbolBM* this, long id) {
 	}
 	this->corriente_ptr = 0;
 
-	if(this->corriente_id == 0)
-		this->corriente_bloque = -1;
+	if(this->corriente_id == 0 || _buscarIdExact(nodo, id) == -1){
+		_nodo_free(nodo);
+		return -1;
+	}
 
-	buscarEnNodo(this, nodo, &id, &ptr);
-
+	_buscarEnNodo(this, nodo, &id, ptr);
 	_nodo_free(nodo);
-	return ptr;
+	return 0;
 }
 
 static int _insertarId(TArbolBM* this, TNodo *nodo, int k_id, long *id, long *ptr) {
-	long ids[this->order], ptrs[this->order+1];
+	long ids[this->orden], ptrs[this->orden+1];
 	int count, count1, count2, k;
 	count = nodo->cant + 1;
-	count1 = count < this->order ? count : this->order/2;
+	count1 = count < this->orden ? count : this->orden/2;
 	count2 = count - count1;
-	for(k = this->order/2; k < k_id; k++) {
+	for(k = this->orden/2; k < k_id; k++) {
 		ids[k] = nodo->ids[k];
 		ptrs[k+1] = nodo->ptrs[k+1];
 	}
@@ -232,13 +249,13 @@ static int _insertarId(TArbolBM* this, TNodo *nodo, int k_id, long *id, long *pt
 		TNodo* nnodo = _nodo_malloc(this);
 		nnodo->hoja = nodo->hoja;
 		count2 -= !nodo->hoja;
-		for(s = this->order/2 + !nodo->hoja, d = 0; d < count2; s++, d++) {
+		for(s = this->orden/2 + !nodo->hoja, d = 0; d < count2; s++, d++) {
 			nnodo->ids[d] = ids[s];
 			nnodo->ptrs[d] = ptrs[s];
 		}
 		nnodo->ptrs[d] = ptrs[s];
 		nnodo->cant = count2;
-		*id = ids[this->order/2];
+		*id = ids[this->orden/2];
 		*ptr = this->alloc_bloque++;
 		if(nodo->hoja) {  /* insert in sequential linked list */
 			nnodo->ptrs[0] = nodo->ptrs[0];
@@ -263,7 +280,7 @@ static int _recInsertar(TArbolBM* this, long block, long *id, long *ptr, int *er
 	int misma_id;
 
 	_leerNodo(this, block, nodo);
-	k_id = buscarId(nodo, *id);
+	k_id = _buscarIdAprox(nodo, *id);
 	misma_id = k_id && nodo->ids[k_id-1] == *id;
 
 	if(!nodo->hoja)
@@ -306,27 +323,65 @@ int Arbol_insertar(TArbolBM* this, long id, long ptr){
  * 1) Arranco desde raiz, y busco hoja L donde pertence
  * 2) Remuevo elemento
  * 3) 
+ *
+ * @return Ok ->0, error (o no existe) =! 0
  */
 int Arbol_remover(TArbolBM* this, long id){
 	TNodo *nodo = _nodo_malloc(this);
+	long corriente_padre = -1;
 
 	this->corriente_bloque = this->root_bloque; // Seteo bloque correinte como raiz
 	for(;;) {
 		_leerNodo(this, this->corriente_bloque, nodo);
-		this->corriente_id = buscarId(nodo, id);
+		this->corriente_id = _buscarIdAprox(nodo, id);
 
 		if(nodo->hoja)
 			break;
 
+		corriente_padre = this->corriente_bloque;
 		this->corriente_bloque = nodo->ptrs[this->corriente_id];
 	}
 	this->corriente_ptr = 0;
+
+	int k_id = _buscarIdExact(nodo, id);
+	if( k_id == -1){ // Elemento no existe
+		_nodo_free(nodo);
+		return -1;
+	}
+
+	if(nodo->cant > this->orden / 2){ // Eliminacion facil
+		int i;
+		nodo->cant--;
+		for(i=k_id; i < nodo->cant; i++){
+			nodo->ids[k_id] = nodo->ids[k_id+1];
+			nodo->ptrs[k_id+1] = nodo->ids[k_id+2];
+		}
+
+		_escribirNodo(this, this->corriente_bloque, nodo);
+		_nodo_free(nodo);
+		return 0;
+	}
+
+	printf("Eliminacion complicada, underflow \n");
+
+
 	// this->corriente_bloque es la hoja donde esta
+	printf("\nSoy bloque n: %ld cant:%d\n", this->corriente_bloque, nodo->cant);
 	int i;
-	for(i=0; i < this->order - 1; i++){
+	for(i=0; i < nodo->cant - 1; i++){
 		printf("leaf %d nodo->ids[%d] %ld nodo->ptrs[%d] %ld\n", nodo->hoja, i,  nodo->ids[i], i, nodo->ptrs[i]);
 	}
-	printf("nodo->ptrs[63] %ld\n", nodo->ptrs[63]);
+	printf("nodo->ptrs[%d] %ld\n", i, nodo->ptrs[i]);
+
+	if(corriente_padre != -1){
+		_leerNodo(this, corriente_padre, nodo);
+
+		printf("Corriente padre: %ld cant: %d hoja %d\n", corriente_padre, nodo->cant, nodo->hoja);
+		for(i=0; i < nodo->cant; i++){
+			printf("%ld | _%ld_ | ", nodo->ptrs[i], nodo->ids[i]);
+		}
+		printf("%ld\n", nodo->ptrs[i]);
+	}
 	_nodo_free(nodo);
 	return 0;
 }

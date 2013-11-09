@@ -5,20 +5,39 @@
 
 typedef struct TArbolBM TArbolBM;
 
-TArbolBM* Arbol_crear(char *path, size_t order);
-/* open or create index file, find free entry in index table,
-    fill in entry, DupKeys is 1 if duplicate keys are allowed, 0 if not,
-    return number of entry in table */
+/** Crea el arbol b+.
+ * @param path: path del archivo que se usara para guardar
+ * @param orden: orden del arbol
+ * @return nueva instancia de Arbol
+ */
+TArbolBM* Arbol_crear(char *path, size_t orden);
 
+/** Destruye la instancia de arbol.
+ * @param this:instancia del arbol
+ */
 void Arbol_destruir(TArbolBM* this);
-/* close Index file, free entry in index info table */
 
-int Arbol_insertar(TArbolBM* this, long Key, long Ptr);
-/* insert Key & Ptr in index file, return 0 for success, nonzero for error */
+/** Inserta elmento en arbol.
+ * @param this:instancia del arbol
+ * @param id
+ * @param ptr: elemento a guardar
+ * @return 0->ok, resto->error
+ */
+int Arbol_insertar(TArbolBM* this, long id, long ptr);
 
-long Arbol_get(TArbolBM* this, long Key);
-/* return pointer for entry in Index file <= Key, return -1 if none */
+/** Obtiene un elemento del arbol.
+ * @param this:instancia del arbol
+ * @param id
+ * @param ptr: elemento
+ * @return 0->ok, resto error
+ */
+int Arbol_get(TArbolBM* this, long id, long* ptr);
 
+/** Remueve elemento.
+ * @param this:instancia del arbol
+ * @param id
+ * @return 0->ok, resto error
+ */
 int Arbol_remover(TArbolBM* this, long id);
 
 
