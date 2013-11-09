@@ -125,7 +125,7 @@ TArbolBM* Arbol_crear(char *path, size_t orden){
 	this->path = strcpy(malloc(strlen(path)+1), path);
 	this->corriente_bloque = -1;
 	this->orden = orden;
-	// 4 * orden para punteros + 4 * (ordern -1) para llaves + (2) es hoja + (2) cuenta de llaves + 4 prefijo longitud
+	// 4 * orden para punteros + 4 * (orden -1) para llaves + (2) es hoja + (2) cuenta de llaves + 4 prefijo longitud
 	this->block_size = 2 * orden * sizeof(long) +  sizeof(size_t);
 
 	this->arch = ArchivoFijo_crear(path, this->block_size, this->block_size - sizeof(size_t));
@@ -153,7 +153,6 @@ TArbolBM* Arbol_crear(char *path, size_t orden){
 }
 
 void Arbol_destruir(TArbolBM* this){
-	// TODO: cerrar arch
 	_escribirCabecera(this);
 	Archivo_destruir(this->arch);
 	free(this->path);
@@ -227,24 +226,32 @@ static int _insertarId(TArbolBM* this, TNodo *nodo, int k_id, long *id, long *pt
 	long ids[this->orden], ptrs[this->orden+1];
 	int count, count1, count2, k;
 	count = nodo->cant + 1;
+	// tama~no que va a tener finalmente el nodo
 	count1 = count < this->orden ? count : this->orden/2;
 	count2 = count - count1;
+
+	// Creo vector ordenado con todos los ids y ptrs
 	for(k = this->orden/2; k < k_id; k++) {
 		ids[k] = nodo->ids[k];
 		ptrs[k+1] = nodo->ptrs[k+1];
 	}
+
 	ids[k_id] = *id;
 	ptrs[k_id+1] = *ptr;
+
 	for(k = k_id; k < nodo->cant; k++) {
 		ids[k+1] = nodo->ids[k];
 		ptrs[k+2] = nodo->ptrs[k+1];
 	}
+	// --
+
 	for(k = k_id; k < count1; k++) {
 		nodo->ids[k] = ids[k];
 		nodo->ptrs[k+1] = ptrs[k+1];
 	}
 	nodo->cant = count1;
-	if(count2) {
+
+	if(count2) { // Hay overflow!
 		int s, d;
 		TNodo* nnodo = _nodo_malloc(this);
 		nnodo->hoja = nodo->hoja;
@@ -257,7 +264,7 @@ static int _insertarId(TArbolBM* this, TNodo *nodo, int k_id, long *id, long *pt
 		nnodo->cant = count2;
 		*id = ids[this->orden/2];
 		*ptr = this->alloc_bloque++;
-		if(nodo->hoja) {  /* insert in sequential linked list */
+		if(nodo->hoja) {  // inserto el nodo sigueinte para lista secuencial
 			nnodo->ptrs[0] = nodo->ptrs[0];
 			nodo->ptrs[0] = *ptr;
 		}
@@ -319,6 +326,112 @@ int Arbol_insertar(TArbolBM* this, long id, long ptr){
 	return error;
 }
 
+static int _removerId(TArbolBM* this, TNodo *nodo, int k_id){
+	int i;
+	int under = 0;
+	if(nodo->cant == this->orden / 2)
+		under = 1;
+
+	printf("Llamo a remover id k_id %d id: %ld\n", k_id, nodo->ids[k_id -1]);
+
+	nodo->cant--;
+	for(i=k_id-1; i < nodo->cant; i++){
+		nodo->ids[i] = nodo->ids[i+1];
+		nodo->ptrs[i+1] = nodo->ptrs[i+2];
+	}
+
+	return under;
+}
+
+static void _fusionarNodos(TNodo* nodo1, TNodo* nodo2){
+	int i = 0;
+	for(i=0; i < nodo2->cant; i++){
+		nodo1->ids[nodo1->cant+i] = nodo2->ids[i];
+		nodo1->ptrs[nodo1->cant+i+1] = nodo2->ptrs[i+1];
+	}
+	nodo1->ptrs[0] = nodo2->ptrs[0];
+}
+
+static int _recRemover(TArbolBM* this, long block, long *id, int *error){
+	TNodo *nodo = _nodo_malloc(this);
+	int k_id, under = 0;
+	int misma_id;
+
+	_leerNodo(this, block, nodo);
+	k_id = _buscarIdAprox(nodo, *id);
+	misma_id = k_id && nodo->ids[k_id-1] == *id;
+
+	if(!nodo->hoja)
+		under = _recRemover(this, nodo->ptrs[k_id], id, error);
+
+	if(nodo->hoja) {
+		if(misma_id){
+			under = _removerId(this, nodo, k_id);
+			_escribirNodo(this, block, nodo);
+		}else{
+			*error = -1;
+		}
+	}else if(under){
+		int i;
+		long mov_id;
+		// Primero intento balancear
+		// nodo->ptrs[k_id-/+1] es hermano (-)izq (+) der
+		long hermano = k_id > 0 ? k_id -1 : k_id +1;
+
+		TNodo *hernodo = _nodo_malloc(this);
+		_leerNodo(this, nodo->ptrs[hermano], hernodo);
+
+		TNodo *hijnodo = _nodo_malloc(this);
+		_leerNodo(this, nodo->ptrs[k_id], hijnodo);
+
+		if(hernodo->cant > this->orden /2){ // Puedo rebalancear
+			if(hermano < k_id){ // izq
+				for(i=hijnodo->cant; i > 0; i--){
+					hijnodo->ids[i] = hijnodo->ids[i-1];
+					hijnodo->ptrs[i+1] = hijnodo->ids[i];
+				}
+				hijnodo->cant++;
+				mov_id = hernodo->ids[hernodo->cant-1];
+				hijnodo->ids[0] = misma_id ? mov_id : nodo->ids[k_id];
+				hijnodo->ptrs[1] = hernodo->ids[hernodo->cant];
+				hernodo->cant--;
+			}else{ // der
+				mov_id = hernodo->ids[0];
+				hijnodo->ids[hijnodo->cant] = misma_id ? mov_id : nodo->ids[k_id];;
+				hijnodo->cant++;
+				hijnodo->ptrs[hijnodo->cant] = hernodo->ids[1];
+
+				for(i=0; i < hernodo->cant; i++){
+					hernodo->ids[i] = hernodo->ids[i+1];
+					hernodo->ptrs[i+1] = hernodo->ids[i+2];
+				}
+				hernodo->cant--;
+			}
+			nodo->ids[k_id] = mov_id;
+		}else{ // Hay que fusionar
+			// TODO: habria que guardar el nodo que se esta liberando, sino va a qedar como basura en el archivo
+			if(hermano < k_id){
+				_fusionarNodos(hernodo, hijnodo);
+			}else{
+				_fusionarNodos(hijnodo, hernodo);
+			}
+
+			under = _removerId(this, nodo, k_id);
+		}
+
+		_escribirNodo(this, block, nodo);
+		_escribirNodo(this, nodo->ptrs[hermano], hernodo);
+		_escribirNodo(this, nodo->ptrs[k_id], hijnodo);
+
+		_nodo_free(hernodo);
+		_nodo_free(hijnodo);
+
+	}
+
+	_nodo_free(nodo);
+	return under;
+}
+
 /** Remover elemento.
  * 1) Arranco desde raiz, y busco hoja L donde pertence
  * 2) Remuevo elemento
@@ -327,10 +440,14 @@ int Arbol_insertar(TArbolBM* this, long id, long ptr){
  * @return Ok ->0, error (o no existe) =! 0
  */
 int Arbol_remover(TArbolBM* this, long id){
-	TNodo *nodo = _nodo_malloc(this);
-	long corriente_padre = -1;
+	//int under;
+	int error = 0;
 
-	this->corriente_bloque = this->root_bloque; // Seteo bloque correinte como raiz
+	/*under =*/ _recRemover(this, this->root_bloque, &id, &error);
+
+	return error;
+
+	/*this->corriente_bloque = this->root_bloque; // Seteo bloque correinte como raiz
 	for(;;) {
 		_leerNodo(this, this->corriente_bloque, nodo);
 		this->corriente_id = _buscarIdAprox(nodo, id);
@@ -344,7 +461,7 @@ int Arbol_remover(TArbolBM* this, long id){
 	this->corriente_ptr = 0;
 
 	int k_id = _buscarIdExact(nodo, id);
-	if( k_id == -1){ // Elemento no existe
+	if(this->corriente_id == 0 || k_id == -1){ // Elemento no existe
 		_nodo_free(nodo);
 		return -1;
 	}
@@ -365,6 +482,8 @@ int Arbol_remover(TArbolBM* this, long id){
 	printf("Eliminacion complicada, underflow \n");
 
 
+
+
 	// this->corriente_bloque es la hoja donde esta
 	printf("\nSoy bloque n: %ld cant:%d\n", this->corriente_bloque, nodo->cant);
 	int i;
@@ -383,5 +502,5 @@ int Arbol_remover(TArbolBM* this, long id){
 		printf("%ld\n", nodo->ptrs[i]);
 	}
 	_nodo_free(nodo);
-	return 0;
+	return 0;*/
 }
