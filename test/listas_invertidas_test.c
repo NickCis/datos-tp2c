@@ -42,7 +42,7 @@ int main(int argc, char* argv[]){
 			scanf("%d", &id);
 			ListaInvertida_set(lista, id);
 
-			if(ListaInvertida_erase(TListaInvertida* this))
+			if(ListaInvertida_erase(lista))
 				printf("Error borrando id %d\n", id);
 			else
 				printf("OK borrando id %d\n", id);

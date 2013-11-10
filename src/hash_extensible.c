@@ -169,7 +169,7 @@ int HashExtensible_insertar(THashExtensible* this, uint8_t* ele, size_t ele_size
 
 		// Redisperso
 		int j =0;
-		for(j=0; j <= i; j++){
+		for(j=0; j < i; j++){
 			HashExtensible_insertar(this, regs[j].ele, regs[j].size);
 			free(regs[j].ele);
 		}
