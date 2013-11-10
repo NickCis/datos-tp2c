@@ -22,6 +22,7 @@ void menu_pos_busqueda_de_servicio(TUsuario* user, unsigned int idserv);
 void nueva_consulta(TUsuario* user, TServicio* serv);
 void nueva_cotizacion(TUsuario* user, TServicio* serv);
 void list_categorias();
+void list_usuarios(char t_u);
 
 int borrar_usuario(unsigned int dni);
 
@@ -308,9 +309,25 @@ void buscar_servicio(TUsuario* user){
 			break;
 
 		switch(opt){
-			case '1':
-				printf("TODO:\n");
+			case '1':{
+				list_usuarios('p');
+				printf("Ingrese id de provedor:\n");
+				unsigned dni_p = get_dni();
+				if(!dni_p){
+					printf("Dni invalido\n");
+					break;
+				}
+
+				unsigned int id_p;
+				TServicio* serv;
+				while( (serv = Servicio_from_dni_prov(dni_p, &id_p)) ){
+					imprimir_servicio(serv);
+					Servicio_free(serv);
+				}
+
+				menu_pos_busqueda_de_servicio(user, 0);
 				break;
+			}
 
 			case '2':{
 				printf("Ingrese id servicio:\n");
@@ -342,6 +359,7 @@ void buscar_servicio(TUsuario* user){
 			case '4':
 				printf("TODO:\n");
 				break;
+
 			default:
 				break;
 		}
@@ -603,13 +621,7 @@ void menu_conectado_admin(TUsuario* user){
 				crear_usuario('a');
 				break;
 			case '2':{
-				size_t len;
-				size_t i;
-				unsigned int* ids = Usuario_from_t_u('a', &len);
-				for(i=0; i < len; i++){
-					printf("Usuario #%d\n", ids[i]);
-				}
-				free(ids);
+				list_usuarios('a');
 
 				printf("Ingrese Id para dar de baja:\n");
 				unsigned int dni = get_dni();
@@ -629,10 +641,25 @@ void menu_conectado_admin(TUsuario* user){
 			}
 			case '5':
 				list_categorias();
+				printf("TODO:\n");
 				break;
-			case '6':
+			case '6':{
 				list_categorias();
+				printf("Ingrese id a eliminar:\n");
+				unsigned int id_c = get_dni();
+				if(!id_c){
+					printf("Id invalida\n");
+					break;
+				}
+				TCategoria* cat = Categoria_del(id_c);
+				if(cat){
+					printf("Categoria borrada correctamente\n");
+					Categoria_free(cat);
+				}else{
+					printf("Error borrando Categoria\n");
+				}
 				break;
+			}
 			case '7':
 				break;
 
@@ -673,4 +700,20 @@ void list_categorias(){
 		printf("\tDesc: '%s'\n", Categoria_get_descripcion(cat));
 		Categoria_free(cat);
 	}
+}
+
+void list_usuarios(char t_u){
+	size_t len;
+	size_t i;
+	unsigned int* ids = Usuario_from_t_u(t_u, &len);
+	for(i=0; i < len; i++){
+		TUsuario* user = Usuario_from_dni(ids[i]);
+		if(user){
+			printf("Usuario #%d\n", Usuario_get_dni(user));
+			printf("\tNombre: '%s'\n", Usuario_get_nombre(user));
+			printf("\tApellido: '%s'\n", Usuario_get_apellido(user));
+			free(user);
+		}
+	}
+	free(ids);
 }
