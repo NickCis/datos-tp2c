@@ -182,3 +182,12 @@ const char* Categoria_get_descripcion(TCategoria* this){
 		return NULL;
 	return this->descripcion;
 }
+
+TCategoria* Categoria_del(unsigned int id){
+	size_t size;
+	uint8_t* buf = HashExtensible_del(hash_categorias, id, &size);
+	TCategoria* cat = _categoriaDesdeBuf(buf, size);
+	free(buf);
+
+	return cat;
+}

@@ -431,6 +431,7 @@ TUsuario* Usuario_del(unsigned int dni){
 	TUsuario* user = _usuarioDesdeBuf(buf, size);
 	free(buf);
 
+	_removerIdIndiceTU(user->dni, user->t_u);
 	return user;
 }
 

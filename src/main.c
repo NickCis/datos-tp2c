@@ -5,9 +5,11 @@
 #include "servicios.h"
 #include "consultas.h"
 #include "cotizaciones.h"
+#include "categorias.h"
 
 void conectarse();
-void crear_usuario();
+void crear_usuario(char t_u);
+void crear_categoria();
 void menu_conectado_usuario(TUsuario* user);
 void menu_conectado_provedor(TUsuario* user);
 void menu_conectado_admin(TUsuario* user);
@@ -19,6 +21,7 @@ void imprimir_servicio(TServicio* serv);
 void menu_pos_busqueda_de_servicio(TUsuario* user, unsigned int idserv);
 void nueva_consulta(TUsuario* user, TServicio* serv);
 void nueva_cotizacion(TUsuario* user, TServicio* serv);
+void list_categorias();
 
 int borrar_usuario(unsigned int dni);
 
@@ -27,6 +30,7 @@ int main(int argc, char* argv[]){
 	Servicios_init();
 	Consultas_init();
 	Cotizaciones_init();
+	Categorias_init();
 	printf(" Paginas Doradas ** \n");
 	while(1){
 		printf("Que desea hacer?\n");
@@ -43,7 +47,7 @@ int main(int argc, char* argv[]){
 				break;
 
 			case '2':
-				crear_usuario();
+				crear_usuario('u');
 				break;
 
 			default:
@@ -55,6 +59,7 @@ int main(int argc, char* argv[]){
 	Servicios_end();
 	Consultas_end();
 	Cotizaciones_end();
+	Categorias_end();
 }
 
 void conectarse(){
@@ -99,7 +104,7 @@ void conectarse(){
 	Usuario_free(user);
 }
 
-void crear_usuario(){
+void crear_usuario(char t_u){
 	unsigned int dni = 0;
 	char nombre[101];
 	char apellido[101];
@@ -114,7 +119,7 @@ void crear_usuario(){
 	};
 	char pass[33];
 	char prov[101];
-	char t_u = 'u';
+	//char t_u = 'u';
 	printf("Crear un nuevo usuario\n");
 	printf("Ingrese dni:\n");
 	while( (dni = get_dni()) == 0){
@@ -321,10 +326,22 @@ void buscar_servicio(TUsuario* user){
 				printf("TODO:\n");
 				break;
 
-			case '4':
-				printf("TODO:\n");
+			case '4':{
+				list_categorias();
+				printf("Ingrese id de categoria:\n");
+				unsigned int id_cat = get_dni();
+				size_t len;
+				unsigned int* servs = Servicio_from_categoria(id_cat, &len);
+				size_t i;
+				for(i=0; i < len; i++){
+					TServicio* serv = Servicio_from_id(servs[i]);
+					imprimir_servicio(serv);
+					Servicio_free(serv);
+				}
+				free(servs);
+				menu_pos_busqueda_de_servicio(user, 0);
 				break;
-
+			}
 			default:
 				break;
 		}
@@ -441,9 +458,47 @@ void menu_conectado_provedor(TUsuario* user){
 				
 				break;
 			}
-			case '6':
-				printf("TODO\n");
+			case '6':{
+				list_categorias();
+				printf("Ingrese id de servicio:\n");
+				unsigned int id_s = get_dni();
+				if(!id_s){
+					printf("Id invalid\n");
+					break;
+				}
+
+				TServicio* serv = Servicio_from_id(id_s);
+				if(!serv){
+					printf("Servicio inexistente\n");
+					break;
+				}
+
+				if(Servicio_get_dni_p(serv) != Usuario_get_dni(user)){
+					printf("El servicio no es tuyo!\n");
+					break;
+				}
+
+				Servicio_free(serv);
+
+				printf("Ingrese id de categoria:\n");
+				unsigned int id_c = get_dni();
+				if(!id_c){
+					printf("Id invalid\n");
+					break;
+				}
+
+				TCategoria* cat = Categoria_from_id(id_c);
+				if(!cat){
+					printf("Categoria inexistente\n");
+					break;
+				}
+
+				Categoria_free(cat);
+
+				Servicio_agregar_categoria(id_s, id_c);
+
 				break;
+			}
 
 			default:
 				break;
@@ -525,5 +580,97 @@ void borrar_servicio(TUsuario* user){
 }
 
 void menu_conectado_admin(TUsuario* user){
-	printf("TODO:\n");
+	while(1){
+		printf("Que desea hacer?\n");
+		if(Usuario_get_tipo(user) == 's'){
+			printf("1 - Crear administrador\n");
+			printf("2 - Dar de baja administrador\n");
+		}
+		printf("3 - Crear nueva categoria\n");
+		printf("4 - Crear nuevas categorias (alta masiva)\n");
+		printf("5 - Modificar categoria\n");
+		printf("6 - Dar de baja categoria\n");
+		printf("7 - Moderar preguntas\n");
+		printf("s - Salir\n");
+		printf("Seleccione opcion\n");
+		char opt = read_opt();
+		if(opt == 's')
+			break;
+		if((opt == '1' || opt == '2') && Usuario_get_tipo(user) != 's')
+			opt = 0;
+		switch(opt){
+			case '1':
+				crear_usuario('a');
+				break;
+			case '2':{
+				size_t len;
+				size_t i;
+				unsigned int* ids = Usuario_from_t_u('a', &len);
+				for(i=0; i < len; i++){
+					printf("Usuario #%d\n", ids[i]);
+				}
+				free(ids);
+
+				printf("Ingrese Id para dar de baja:\n");
+				unsigned int dni = get_dni();
+				if(dni == 0 || dni == Usuario_get_dni(user)){
+					printf("Dni invalido\n");
+					break;
+				}
+				borrar_usuario(dni);
+				break;
+			}
+			case '3':
+				crear_categoria();
+				break;
+			case '4':{
+				printf("TODO:\n");
+				break;
+			}
+			case '5':
+				list_categorias();
+				break;
+			case '6':
+				list_categorias();
+				break;
+			case '7':
+				break;
+
+			default:
+				break;
+		}
+	}
+}
+
+void crear_categoria(){
+	char nombre[101];
+	char descripcion[301];
+
+	printf("Crear nueva categoria\n");
+	printf("Ingrese nombre:\n");
+	read_str(nombre, 100);
+
+	printf("Ingrese descripcion:\n");
+	read_str(descripcion, 100);
+
+	TCategoria* cat = Categoria_new(nombre, descripcion);
+	if( ! cat ){
+		printf("Error\n");
+		return;
+	}
+
+	Categoria_free(cat);
+
+	printf("Categoria creada Satisfactoriamente\n");
+	return;
+}
+void list_categorias(){
+	TCategoria* cat;
+	unsigned int id_p= 0;
+	while( (cat = Categoria_all(&id_p)) ){
+		printf("Categoria #%d\n", Categoria_get_id(cat));
+		printf("\tNombre: '%s'\n", Categoria_get_nombre(cat));
+		printf("\tDesc: '%s'\n", Categoria_get_descripcion(cat));
+		Categoria_free(cat);
+	}
 }

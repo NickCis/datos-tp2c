@@ -21,4 +21,6 @@ const char* Categoria_get_nombre(TCategoria* this);
 const char* Categoria_get_descripcion(TCategoria* this);
 
 int Categoria_free(TCategoria* this);
+
+TCategoria* Categoria_del(unsigned int id);
 #endif

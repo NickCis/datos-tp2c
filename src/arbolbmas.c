@@ -332,7 +332,7 @@ static int _removerId(TArbolBM* this, TNodo *nodo, int k_id){
 	if(nodo->cant == this->orden / 2)
 		under = 1;
 
-	printf("Llamo a remover id k_id %d id: %ld\n", k_id, nodo->ids[k_id -1]);
+	//printf("Llamo a remover id k_id %d id: %ld\n", k_id, nodo->ids[k_id -1]);
 
 	nodo->cant--;
 	for(i=k_id-1; i < nodo->cant; i++){

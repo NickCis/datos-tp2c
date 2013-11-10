@@ -72,6 +72,8 @@ int Servicios_init(){
 
 	servicios_last_id = getLastId(SERVICIOS_LAST_ID_FILE);
 
+	indice_cat = Arbol_crear(SERVICIOS_INDICE_CAT_PATH, SERVICIOS_ARBM_CAT_ORDEN);
+
 	return 0;
 }
 
@@ -80,6 +82,9 @@ int Servicios_end(){
 	writeLastId(SERVICIOS_LAST_ID_FILE, servicios_last_id);
 	hash_servicios = NULL;
 	servicios_last_id = 0;
+
+	Arbol_destruir(indice_cat);
+	indice_cat = NULL;
 	return 0;
 }
 
