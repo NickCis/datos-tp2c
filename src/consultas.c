@@ -5,8 +5,8 @@
 #include "serializador.h"
 #include "autoincrement.h"
 
-THashExtensible* hash_consultas = NULL;
-unsigned int consultas_last_id = 0;
+static THashExtensible* hash_consultas = NULL;
+static unsigned int consultas_last_id = 0;
 
 struct TConsulta {
 	unsigned int id;
@@ -27,9 +27,9 @@ unsigned int Consultas_get_id(uint8_t* ele, size_t size){
 	return id;
 }
 
-TConsulta* _consultaDesdeBuf(uint8_t* buf, size_t size);
+static TConsulta* _consultaDesdeBuf(uint8_t* buf, size_t size);
 
-uint8_t* _consBufDesdeData(
+static uint8_t* _consBufDesdeData(
 	unsigned int id,
 	unsigned int id_serv,
 	unsigned int dni,
@@ -106,7 +106,7 @@ TConsulta* Consulta_new(
 	return cons;
 }
 
-uint8_t* _consBufDesdeData(
+static uint8_t* _consBufDesdeData(
 	unsigned int id,
 	unsigned int id_serv,
 	unsigned int dni,
@@ -177,7 +177,7 @@ uint8_t* _consBufDesdeData(
 }
 
 
-TConsulta* _consultaDesdeBuf(uint8_t* buf, size_t buf_size){
+static TConsulta* _consultaDesdeBuf(uint8_t* buf, size_t buf_size){
 	TConsulta* this = (TConsulta*) calloc(1, sizeof(TConsulta));
 	SerializadorData data;
 	size_t size = 0;

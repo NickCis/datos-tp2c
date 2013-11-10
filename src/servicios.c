@@ -5,8 +5,8 @@
 #include "serializador.h"
 #include "autoincrement.h"
 
-THashExtensible* hash_servicios = NULL;
-unsigned int servicios_last_id = 0;
+static THashExtensible* hash_servicios = NULL;
+static unsigned int servicios_last_id = 0;
 
 struct TServicio {
 	unsigned int id;
@@ -23,12 +23,12 @@ unsigned int Servicios_get_id(uint8_t* ele, size_t size){
 
 /** Devuelve un TServicio sacando la info desde buf
  */
-TServicio* _servicioDesdeBuf(uint8_t* buf, size_t size);
+static TServicio* _servicioDesdeBuf(uint8_t* buf, size_t size);
 
 /** Serializa la data, y devuelve un buffer, size es un parametro de salida, tama~no del buffer.
  * Hay que liberar la salida
  */
-uint8_t* _servBufDesdeData(
+static uint8_t* _servBufDesdeData(
 	unsigned int id,
 	unsigned int dni_p,
 	char *nombre,
@@ -93,7 +93,7 @@ TServicio* Servicio_new(
 	return serv;
 }
 
-uint8_t* _servBufDesdeData(
+static uint8_t* _servBufDesdeData(
 	unsigned int id,
 	unsigned int dni_p,
 	char *nombre,
@@ -128,7 +128,7 @@ uint8_t* _servBufDesdeData(
 	return buf;
 }
 
-TServicio* _servicioDesdeBuf(uint8_t* buf, size_t buf_size){
+static TServicio* _servicioDesdeBuf(uint8_t* buf, size_t buf_size){
 	TServicio* this = (TServicio*) calloc(1, sizeof(TServicio));
 	SerializadorData data;
 	size_t size = 0;

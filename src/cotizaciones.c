@@ -6,8 +6,8 @@
 #include "autoincrement.h"
 
 // Hash usado para guardar en disco a las cotizaciones
-THashExtensible* hash_cotizaciones = NULL;
-unsigned int cotizaciones_last_id = 0;
+static THashExtensible* hash_cotizaciones = NULL;
+static unsigned int cotizaciones_last_id = 0;
 
 struct TCotizacion {
 	unsigned int id;
@@ -25,12 +25,12 @@ unsigned int Cotizaciones_get_id(uint8_t* ele, size_t size){
 
 /** Devuelve un TCotizacion sacando la info desde buf
  */
-TCotizacion* _cotizacionDesdeBuf(uint8_t* buf, size_t size);
+static TCotizacion* _cotizacionDesdeBuf(uint8_t* buf, size_t size);
 
 /** Serializa la data, y devuelve un buffer, size es un parametro de salida, tama~no del buffer.
  * Hay que liberar la salida
  */
-uint8_t* _cotBufDesdeData(
+static uint8_t* _cotBufDesdeData(
 	unsigned int id,
 	unsigned int id_serv,
 	unsigned int dni,
@@ -98,7 +98,7 @@ TCotizacion* Cotizacion_new(
 	return cot;
 }
 
-uint8_t* _cotBufDesdeData(
+static uint8_t* _cotBufDesdeData(
 	unsigned int id,
 	unsigned int id_serv,
 	unsigned int dni,
@@ -138,7 +138,7 @@ uint8_t* _cotBufDesdeData(
 	return buf;
 }
 
-TCotizacion* _cotizacionDesdeBuf(uint8_t* buf, size_t buf_size){
+static TCotizacion* _cotizacionDesdeBuf(uint8_t* buf, size_t buf_size){
 	TCotizacion* this = (TCotizacion*) calloc(1, sizeof(TCotizacion));
 	SerializadorData data;
 	size_t size = 0;

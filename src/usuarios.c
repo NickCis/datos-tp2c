@@ -5,7 +5,7 @@
 #include "serializador.h"
 
 // Hash usado para guardar en disco a los usuarios
-THashExtensible* hash_usuarios = NULL;
+static THashExtensible* hash_usuarios = NULL;
 
 struct TUsuario {
 	unsigned int dni;
@@ -25,12 +25,12 @@ unsigned int Usuarios_get_id(uint8_t* ele, size_t size){
 
 /** Devuelve un usuario sacando la info desde buf
  */
-TUsuario* _usuarioDesdeBuf(uint8_t* buf, size_t size);
+static TUsuario* _usuarioDesdeBuf(uint8_t* buf, size_t size);
 
 /** Serializa la data, y devuelve un buffer, size es un parametro de salida, tama~no del buffer.
  * Hay que liberar la salida
  */
-uint8_t* _userBufDesdeData(
+static uint8_t* _userBufDesdeData(
 	unsigned int dni,
 	char* nombre,
 	char* apellido,
@@ -98,7 +98,7 @@ TUsuario* Usuario_new(
 	return user;
 }
 
-uint8_t* _userBufDesdeData(
+static uint8_t* _userBufDesdeData(
 	unsigned int dni,
 	char* nombre,
 	char* apellido,
@@ -153,7 +153,7 @@ uint8_t* _userBufDesdeData(
 	return buf;
 }
 
-TUsuario* _usuarioDesdeBuf(uint8_t* buf, size_t buf_size){
+static TUsuario* _usuarioDesdeBuf(uint8_t* buf, size_t buf_size){
 	TUsuario* this = (TUsuario*) calloc(1, sizeof(TUsuario));
 	SerializadorData data;
 	size_t size = 0;

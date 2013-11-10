@@ -21,7 +21,7 @@ struct TArchivo {
 /** Escribe el flag de control de memoria del bloque actual
  * funcion de uso interno.
  */
-void escribir_info_mapa(TArchivo* this){
+static void escribir_info_mapa(TArchivo* this){
 	if(this->mapa_bits){
 		size_t pos = this->cur_bloque / 8;
 		if(pos >= this->mapa_bits_size){

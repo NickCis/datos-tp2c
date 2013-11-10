@@ -35,4 +35,4 @@ main: $(o_files_no_main) main.o
 	$(CC) $(LDFLAGS) $(CFLAGS) main.o $(o_files_no_main) -o $@
 
 clean:
-	$(RM) *.o test/ main creador_admin
+	$(RM) *.o test/ main creador_admin *.dat
