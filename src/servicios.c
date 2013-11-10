@@ -4,9 +4,12 @@
 #include "config.h"
 #include "serializador.h"
 #include "autoincrement.h"
+#include "arbolbmas.h"
+#include "lista_invertida.h"
 
 static THashExtensible* hash_servicios = NULL;
 static unsigned int servicios_last_id = 0;
+static TArbolBM* indice_cat = NULL;
 
 struct TServicio {
 	unsigned int id;
@@ -19,6 +22,23 @@ struct TServicio {
 unsigned int Servicios_get_id(uint8_t* ele, size_t size){
 	unsigned int id = * ( (unsigned int*) ele);
 	return id;
+}
+
+/** Agrega un elemento al indice.
+ */
+static void _insertarIdIndiceCant(unsigned int id, unsigned id_cat){
+	long lista_ref;
+	TListaInvertida* lista = ListaInvertida_crear(SERVICIOS_LISTA_CAT, SERVICIOS_LISTA_CAT_BAJA, SERVICIOS_LISTA_BLOCK);
+
+	if(Arbol_get(indice_cat, id_cat, &lista_ref)){
+		lista_ref = ListaInvertida_new(lista);
+		Arbol_insertar(indice_cat, id_cat, lista_ref);
+	}
+
+	ListaInvertida_set(lista, lista_ref);
+	ListaInvertida_agregar(lista, (uint8_t*) &(id), sizeof(unsigned int));
+	ListaInvertida_escribir(lista);
+	ListaInvertida_destruir(lista);
 }
 
 /** Devuelve un TServicio sacando la info desde buf
@@ -226,4 +246,38 @@ TServicio* Servicio_del(unsigned int id){
 	free(buf);
 
 	return serv;
+}
+
+int Servicio_agregar_categoria(unsigned int id, unsigned int id_cat){
+	_insertarIdIndiceCant(id, id_cat);
+	return 0;
+}
+
+unsigned int* Servicio_from_categoria(unsigned int id_cat, size_t *len){
+	long lista_ref;
+	if(Arbol_get(indice_cat, id_cat, &lista_ref)){
+		return NULL;
+	}
+
+	TListaInvertida* lista = ListaInvertida_crear(SERVICIOS_LISTA_CAT, SERVICIOS_LISTA_CAT_BAJA, SERVICIOS_LISTA_BLOCK);
+
+	ListaInvertida_set(lista, lista_ref);
+
+	unsigned int aux[255];
+	uint8_t* aux_b;
+	size_t aux_s;
+	int i = 0;
+
+	while( (aux_b = ListaInvertida_get(lista, &aux_s))){
+		aux[i++] = * ((unsigned int*) aux_b);
+		free(aux_b);
+	}
+
+	unsigned int *ret = (unsigned int*) malloc(sizeof(unsigned int) * i);
+	*len = i;
+	int k;
+	for(k=0 ; k < i ; k++)
+		ret[k] = aux[k];
+
+	return ret;
 }

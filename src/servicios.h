@@ -1,5 +1,6 @@
 #ifndef __SERVICIOS_H__
 #define __SERVICIOS_H__
+#include <stdlib.h>
 typedef struct TServicio TServicio;
 
 /** Inicializa el uso de Servicios.
@@ -27,6 +28,10 @@ TServicio* Servicio_from_id(unsigned int id);
 /**
  */
 TServicio* Servicio_from_dni_prov(unsigned int dni_prov, unsigned int *id_p);
+
+unsigned int* Servicio_from_categoria(unsigned int id_cat, size_t *len);
+
+int Servicio_agregar_categoria(unsigned int id, unsigned int id_cat);
 
 /** Borra un servicio
  */
