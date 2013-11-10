@@ -65,3 +65,17 @@ int ArchivoReg_destruir(TArchivoReg* this){
 
 	return 0;
 }
+
+int ArchivoReg_seek_end(TArchivoReg* this){
+	if(!this)
+		return 1;
+	fseek(this->fd, 0, SEEK_END);
+	return 0;
+}
+
+int ArchivoReg_seek_start(TArchivoReg* this){
+	if(!this)
+		return 1;
+	fseek(this->fd, 0, SEEK_SET);
+	return 0;
+}

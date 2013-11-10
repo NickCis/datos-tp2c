@@ -33,4 +33,9 @@ int ArchivoReg_escribir(TArchivoReg* this, uint8_t* buff, size_t size);
  */
 int ArchivoReg_destruir(TArchivoReg* this);
 
+/** Seekea el final del archivo.
+ */
+int ArchivoReg_seek_end(TArchivoReg* this);
+int ArchivoReg_seek_start(TArchivoReg* this);
+
 #endif

@@ -93,8 +93,12 @@ int replacememt_selection(char* in_file, char* tmp_name, size_t block_size, size
 
 	Archivo_destruir(in);
 
-	free(last->buf);
-	free(last);
+	//TODO: fijarse por que puede llegar a ser nulo
+	//printf("last %p\n", (void*) last);
+	if(last){
+		free(last->buf);
+		free(last);
+	}
 
 	// Escribir las cosas que qedaron en el buffer a disco
 	if(largo_actual){
@@ -185,7 +189,7 @@ int merge_externo(char* out_path, char* tmp_name, size_t block_size, size_t arra
 		real_array_size = array_size = hasta-desde+1;
 		es_ultimo = 1;
 	}
-	printf("Mergeo desde %d hasta %d con array: %d\n", desde, hasta, array_size);
+	//printf("Mergeo desde %d hasta %d con array: %d\n", desde, hasta, array_size);
 
 	tmp_array = (TMergeHelper**) calloc(array_size, sizeof(void*));
 	for(i=0; i < array_size; i++){
