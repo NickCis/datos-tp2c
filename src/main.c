@@ -322,11 +322,7 @@ void buscar_servicio(TUsuario* user){
 				break;
 			}
 
-			case '3':
-				printf("TODO:\n");
-				break;
-
-			case '4':{
+			case '3':{
 				list_categorias();
 				printf("Ingrese id de categoria:\n");
 				unsigned int id_cat = get_dni();
@@ -342,6 +338,10 @@ void buscar_servicio(TUsuario* user){
 				menu_pos_busqueda_de_servicio(user, 0);
 				break;
 			}
+
+			case '4':
+				printf("TODO:\n");
+				break;
 			default:
 				break;
 		}
