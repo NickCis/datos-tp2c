@@ -48,12 +48,15 @@ unsigned int ListaInvertida_new(TListaInvertida* this){
 	unsigned int next =0;
 
 	if(! Libre_pop(&(this->libres_len), this->libres, &block_num))
-		block_num = Archivo_cant_bloque(this->arch_bloques)+1;
+		block_num = Archivo_cant_bloque(this->arch_bloques);
 
-	Archivo_bloque_seek(this->arch_bloques, this->cur_lista, SEEK_SET);
+	printf("block_num %d\n", block_num);
+
+	Archivo_bloque_seek(this->arch_bloques, block_num, SEEK_SET);
 	Archivo_bloque_new(this->arch_bloques);
 	Archivo_bloque_agregar_buf(this->arch_bloques, (uint8_t*) &next, sizeof(size_t));
 	Archivo_flush(this->arch_bloques);
+	Archivo_bloque_seek(this->arch_bloques, block_num, SEEK_SET);
 	this->read = 0;
 	this->cur_lista = block_num;
 
@@ -61,14 +64,26 @@ unsigned int ListaInvertida_new(TListaInvertida* this){
 }
 
 int ListaInvertida_erase(TListaInvertida* this){
+	size_t aux;
+	unsigned int next;
+	uint8_t* buf;
 	//TODO: arreglar
-	/*if(!this)
+	if(!this)
 		return 1;
 
-	Archivo_bloque_seek(this->arch_bloques, this->cur_lista, SEEK_SET);
-	Archivo_bloque_new(this->arch_bloques);
-	Archivo_bloque_agregar_buf(this->arch_bloques, &len, sizeof(size_t));
-	Archivo_bloque_flush(this->arch_bloques);*/
+	next = this->cur_lista;
+	do{
+		Libre_agregar(&(this->libres_len), &(this->libres), next);
+		Archivo_bloque_seek(this->arch_bloques, this->cur_lista, SEEK_SET);
+		Archivo_bloque_leer(this->arch_bloques);
+		buf = Archivo_get_bloque_buf(this->arch_bloques, &aux);
+		Archivo_bloque_seek(this->arch_bloques, this->cur_lista, SEEK_SET);
+		next = *( (unsigned int*) buf);
+		free(buf);
+		Archivo_bloque_new(this->arch_bloques);
+		Archivo_flush(this->arch_bloques);
+	} while(next);
+
 	return 0;
 }
 
@@ -79,7 +94,9 @@ int ListaInvertida_set(TListaInvertida* this, unsigned int ref){
 	this->read = 0;
 	this->cur_next = 0;
 	this->cur_lista = ref;
-	Archivo_bloque_seek(this->arch_bloques, this->cur_lista, SEEK_SET);
+	if(Archivo_bloque_seek(this->arch_bloques, this->cur_lista, SEEK_SET)){
+		printf("error seek \n");
+	}
 	return 0;
 }
 
@@ -88,17 +105,26 @@ uint8_t* ListaInvertida_get(TListaInvertida* this, size_t* size){
 	if(!this)
 		return NULL;
 
-	if(!this->read){
+	printf("readd %d\n", this->read);
+	if(this->read == 0){
 		this->read = 1;
-		Archivo_bloque_leer(this->arch_bloques);
+		if(Archivo_bloque_leer(this->arch_bloques)){
+			printf("error leyendo\n");
+		}
 		reg = Archivo_get_bloque_buf(this->arch_bloques, size);
+
+		if(!reg)
+			return NULL;
+
 		this->cur_next = * ((unsigned int*) reg);
+		printf("cur_next %d\n", this->cur_next);
 		free(reg);
 	}
 
 	reg = Archivo_get_bloque_buf(this->arch_bloques, size);
 
 	if(reg == NULL && this->cur_next){
+		printf("read next\n");
 		Archivo_bloque_seek(this->arch_bloques, this->cur_next, SEEK_SET);
 		this->read = 0;
 		return ListaInvertida_get(this, size);
@@ -108,11 +134,16 @@ uint8_t* ListaInvertida_get(TListaInvertida* this, size_t* size){
 	return reg;
 }
 
-
 int ListaInvertida_agregar(TListaInvertida* this, uint8_t* ele, size_t size){
 	// TODO: checkear errores
 	if(!this)
 		return 1;
+
+	if(this->read == 0){
+		size_t aux;
+		free(ListaInvertida_get(this, &aux));
+		Archivo_bloque_seek(this->arch_bloques, this->cur_lista, SEEK_SET);
+	}
 
 	if(Archivo_bloque_agregar_buf(this->arch_bloques, ele, size)){// se lleno
 		unsigned int cur_lista = this->cur_lista;
@@ -165,6 +196,7 @@ int ListaInvertida_destruir(TListaInvertida* this){
 	if(!this)
 		return 1;
 
+	//ListaInvertida_escribir(this);
 	Libres_write(this->path_baja, this->libres_len, this->libres);
 	free(this->libres);
 	free(this->path);
