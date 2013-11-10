@@ -181,7 +181,25 @@ int Rtt_destruir(TRtt* this){
 	return 0;
 }
 
+int Rtt_remover_termino(TRtt* this, char* t){
+	if(!this)
+		return 1;
+
+	long id = 0;
+	TArchivoReg* arch = ArchivoReg_crear(this->path_ocu_apa);
+	int ret = _getId(arch, t, &id);
+	ArchivoReg_destruir(arch);
+	if(ret) // No existe
+		return 1;
+
+	Arbol_remover(this->arb, id);
+	//TODO: borrarlo de la lista
+
+	return 0;
+}
+
 static char* _getPalabra(char* texto, size_t *offset){
+	//TODO: solo se contempla division por espacion, nada de \n \t o esas cosas
 	size_t count, i;
 	char* ret;
 	char * txt_o = texto;
