@@ -23,12 +23,26 @@
 #define SERVICIOS_LISTA_CAT "./serv_lista_cat.dat"
 #define SERVICIOS_LISTA_CAT_BAJA "./serv_lista_cat_baja.dat"
 #define SERVICIOS_LISTA_BLOCK (512)
+#define SERVICIOS_RTT_OCU_APA "./serv_rtt_ocu_apa.dat"
+#define SERVICIOS_RTT_OCU_DOC "./serv_rtt_ocu_doc.dat"
+#define SERVICIOS_RTT_ARB "./serv_rtt_arb.dat"
+#define SERVICIOS_RTT_LISTA "./serv_rtt_lista.dat"
+#define SERVICIOS_RTT_LISTA_BAJA "./serv_rtt_lista_baja.dat"
+#define SERVICIOS_RTT_ARB_ORDEN (64)
+#define SERVICIOS_RTT_BLOCK (512)
 
 #define CATEGORIAS_HASH_BLOQUE_PATH "./cat_hash_block.dat"
 #define CATEGORIAS_HASH_TABLA_PATH "./cat_hash_table.dat"
 #define CATEGORIAS_HASH_BAJA_PATH "./cat_hash_baja.dat"
 #define CATEGORIAS_HASH_BLOQUE_SIZE (512)
 #define CATEGORIAS_LAST_ID_FILE "./cat_last_id.dat"
+#define CATEGORIAS_RTT_OCU_APA "./cat_rtt_ocu_apa.dat"
+#define CATEGORIAS_RTT_OCU_DOC "./cat_rtt_ocu_doc.dat"
+#define CATEGORIAS_RTT_ARB "./cat_rtt_arb.dat"
+#define CATEGORIAS_RTT_LISTA "./cat_rtt_lista.dat"
+#define CATEGORIAS_RTT_LISTA_BAJA "./cat_rtt_lista_baja.dat"
+#define CATEGORIAS_RTT_ARB_ORDEN (64)
+#define CATEGORIAS_RTT_BLOCK (512)
 
 #define COTIZACIONES_HASH_BLOQUE_PATH "./cot_hash_block.dat"
 #define COTIZACIONES_HASH_TABLA_PATH "./cot_hash_table.dat"

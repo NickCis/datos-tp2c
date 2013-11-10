@@ -4,6 +4,7 @@
 #include "config.h"
 #include "serializador.h"
 #include "autoincrement.h"
+#include "rtt.h"
 
 static THashExtensible* hash_categorias = NULL;
 static unsigned int categorias_last_id = 0;
@@ -17,6 +18,18 @@ struct TCategoria {
 unsigned int Categorias_get_id(uint8_t* ele, size_t size){
 	unsigned int id = * ( (unsigned int*) ele);
 	return id;
+}
+
+static TRtt* _rtt(){
+	return Rtt_crear(
+		CATEGORIAS_RTT_OCU_APA,
+		CATEGORIAS_RTT_OCU_DOC,
+		CATEGORIAS_RTT_ARB,
+		CATEGORIAS_RTT_LISTA,
+		CATEGORIAS_RTT_LISTA_BAJA,
+		CATEGORIAS_RTT_ARB_ORDEN,
+		CATEGORIAS_RTT_BLOCK
+	);
 }
 
 static TCategoria* _categoriaDesdeBuf(uint8_t* buf, size_t size);
@@ -74,6 +87,11 @@ TCategoria* Categoria_new(
 
 	TCategoria* cat = _categoriaDesdeBuf(buf, size);
 	free(buf);
+
+	TRtt* rtt = _rtt();
+	Rtt_agregar_texto(rtt, last_id+1, desc);
+	Rtt_generar_indice(rtt);
+	Rtt_destruir(rtt);
 
 	categorias_last_id++;
 	return cat;
@@ -190,4 +208,12 @@ TCategoria* Categoria_del(unsigned int id){
 	free(buf);
 
 	return cat;
+}
+
+unsigned int* Categorias_buscar(char* t, size_t* len){
+	unsigned int* ret;
+	TRtt* rtt = _rtt();
+	ret = (unsigned int*) Rtt_buscar(rtt, t, len);
+	Rtt_destruir(rtt);
+	return ret;
 }

@@ -301,7 +301,9 @@ void buscar_servicio(TUsuario* user){
 		printf("1 - Por provedoor\n");
 		printf("2 - Por servicio\n");
 		printf("3 - Por Categoria\n");
-		printf("4 - Por Palabra clave (en descripcion y consulta)\n");
+		printf("4 - Por Palabra clave (descripcion servicio)\n");
+		printf("5 - Por Palabra clave (descripcion categoria)\n");
+		printf("6 - Por Palabra clave (consulta)\n");
 		printf("s - Salir\n");
 		char opt = read_opt();
 
@@ -356,7 +358,57 @@ void buscar_servicio(TUsuario* user){
 				break;
 			}
 
-			case '4':
+			case '4':{
+				unsigned int* servs;
+				size_t len;
+				char t[256];
+				size_t i;
+
+				printf("Ingrese palabra:\n");
+				read_str(t, 255);
+
+				servs = Servicio_buscar(t, &len);
+				if(!servs){
+					printf("no se encontro\n");
+					break;
+				}
+				for(i=0; i < len; i++){
+					TServicio* serv = Servicio_from_id(servs[i]);
+					imprimir_servicio(serv);
+					Servicio_free(serv);
+				}
+				free(servs);
+				menu_pos_busqueda_de_servicio(user, 0);
+				break;
+			}
+
+			case '5':{
+				unsigned int* cats;
+				size_t len;
+				char t[256];
+				size_t i;
+				TCategoria* cat;
+
+				printf("Ingrese palabra:\n");
+				read_str(t, 255);
+
+				cats = Categorias_buscar(t, &len);
+				if(!cats){
+					printf("No se encontro\n");
+					break;
+				}
+				for(i=0; i < len; i++){
+					cat = Categoria_from_id(cats[i]);
+					printf("Categoria #%d\n", Categoria_get_id(cat));
+					printf("\tNombre: '%s'\n", Categoria_get_nombre(cat));
+					printf("\tDesc: '%s'\n", Categoria_get_descripcion(cat));
+					Categoria_free(cat);
+				}
+				free(cats);
+				break;
+			}
+
+			case '6':
 				printf("TODO:\n");
 				break;
 

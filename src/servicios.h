@@ -33,6 +33,8 @@ unsigned int* Servicio_from_categoria(unsigned int id_cat, size_t *len);
 
 int Servicio_agregar_categoria(unsigned int id, unsigned int id_cat);
 
+unsigned int* Servicio_buscar(char* t, size_t* len);
+
 /** Borra un servicio
  */
 TServicio* Servicio_del(unsigned int id);
