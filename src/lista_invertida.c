@@ -69,17 +69,17 @@ int ListaInvertida_erase(TListaInvertida* this){
 	size_t aux;
 	unsigned int next;
 	uint8_t* buf;
-	//TODO: arreglar
 	if(!this)
 		return 1;
 
-	next = this->cur_lista;
+	next = this->cur_first;
 	do{
-		Libre_agregar(&(this->libres_len), &(this->libres), next);
-		Archivo_bloque_seek(this->arch_bloques, this->cur_lista, SEEK_SET);
+		//TODO:
+		//Libre_agregar(&(this->libres_len), &(this->libres), next);
+		Archivo_bloque_seek(this->arch_bloques, next, SEEK_SET);
 		Archivo_bloque_leer(this->arch_bloques);
 		buf = Archivo_get_bloque_buf(this->arch_bloques, &aux);
-		Archivo_bloque_seek(this->arch_bloques, this->cur_lista, SEEK_SET);
+		Archivo_bloque_seek(this->arch_bloques, next, SEEK_SET);
 		next = *( (unsigned int*) buf);
 		free(buf);
 		Archivo_bloque_new(this->arch_bloques);
