@@ -35,34 +35,34 @@ typedef struct {
 
 /** Lee la tabla del archivo.
  */
-int _readTabla(THashExtensible* this);
+static int _readTabla(THashExtensible* this);
 /** Escribe tabla a archivo
  */
-int _writeTabla(THashExtensible* this);
+static int _writeTabla(THashExtensible* this);
 /** Duplica tabla
  */
-int _duplicarTabla(THashExtensible* this);
+static int _duplicarTabla(THashExtensible* this);
 
 /** Hace el reemplazo circular en la tabla de dispersion desde pos, saltando salto y poniendo el valor.
  * @param pos: posicion donde arranca
  * @param salto: tama~no del salto
  * @param valor: valor que escribe en las posiciones
  */
-int _reemplazoCircular(THashExtensible* this, unsigned int pos, unsigned int salto, unsigned int valor);
+static int _reemplazoCircular(THashExtensible* this, unsigned int pos, unsigned int salto, unsigned int valor);
 /** Lee archivo de bloques libres
  */
-int _readLibres(THashExtensible* this);
+static int _readLibres(THashExtensible* this);
 /** Escribe archivo de bloques libres
  */
-int _writeLibres(THashExtensible* this);
+static int _writeLibres(THashExtensible* this);
 /**Agrega numero de bloque a bloques libres.
  */
-int _agregarLibre(THashExtensible* this, unsigned int l);
+static int _agregarLibre(THashExtensible* this, unsigned int l);
 /** Devuelve verdadero si hay un bloque libre, lo saca de la lsita y lo devuelve en l
  * @param l[out]: numero de bloque libre;
  * @return 0 -> no hay, 1 si hay
  */
-int _popLibre(THashExtensible* this, unsigned int *l);
+static int _popLibre(THashExtensible* this, unsigned int *l);
 
 THashExtensible* HashExtensible_crear(char* path, char* path_tabla, char* path_baja, size_t block_size, TDispersionFunct funct, THashId get_id){
 	THashExtensible* this;
@@ -169,7 +169,7 @@ int HashExtensible_insertar(THashExtensible* this, uint8_t* ele, size_t ele_size
 
 		// Redisperso
 		int j =0;
-		for(j=0; j < i; j++){
+		for(j=0; j <= i; j++){
 			HashExtensible_insertar(this, regs[j].ele, regs[j].size);
 			free(regs[j].ele);
 		}
@@ -425,7 +425,7 @@ unsigned int HashDispersionModulo(unsigned int id, unsigned int tam_tabla){
 	return id % tam_tabla;
 }
 
-int _readLibres(THashExtensible* this){
+static int _readLibres(THashExtensible* this){
 	FILE* fd_libres;
 	if( (fd_libres = fopen(this->path_baja, "rb"))){//Abrio el archivo
 		//TODO: controlar errores de lectura
@@ -440,7 +440,7 @@ int _readLibres(THashExtensible* this){
 	return 0;
 }
 
-int _writeLibres(THashExtensible* this){
+static int _writeLibres(THashExtensible* this){
 	FILE* fd_libres = fopen(this->path_baja, "w+b");
 	if(fd_libres == NULL) // Error
 		printf("Error loco escribiendo archivo de libres. Errno: %d\n", errno);
@@ -451,14 +451,14 @@ int _writeLibres(THashExtensible* this){
 	return 0;
 }
 
-int _agregarLibre(THashExtensible* this, unsigned int l){
+static int _agregarLibre(THashExtensible* this, unsigned int l){
 	this->libres_len++;
 	this->libres = (unsigned int*) realloc(this->libres, this->libres_len * sizeof(unsigned int));
 	this->libres[this->libres_len-1] = l;
 	return 0;
 }
 
-int _popLibre(THashExtensible* this, unsigned int *l){
+static int _popLibre(THashExtensible* this, unsigned int *l){
 	if(! this->libres_len)
 		return 0;
 
