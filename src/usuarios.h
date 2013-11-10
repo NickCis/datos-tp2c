@@ -29,6 +29,10 @@ TUsuario* Usuario_new(
  */
 TUsuario* Usuario_from_dni(unsigned int dni);
 
+/** Obtiene usuarios desde tipo de usuario
+ */
+unsigned int* Usuario_from_t_u(char t_u, size_t *len);
+
 /** Borra un usuario
  */
 TUsuario* Usuario_del(unsigned int dni);

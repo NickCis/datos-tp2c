@@ -5,6 +5,12 @@
 #define USUARIOS_HASH_TABLA_PATH "./user_hash_table.dat"
 #define USUARIOS_HASH_BAJA_PATH "./user_hash_baja.dat"
 #define USUARIOS_HASH_BLOQUE_SIZE (512)
+#define USUARIOS_INDICE_T_U_PATH "./user_arbm_tu.dat"
+#define USUARIOS_ARBM_TU_ORDEN (64)
+#define USUARIOS_LISTA_T_U "./user_lista_tu.dat"
+#define USUARIOS_LISTA_T_U_BAJA "./user_lista_tu_baja.dat"
+#define USUARIOS_LISTA_BLOCK (512)
+
 
 #define SERVICIOS_HASH_BLOQUE_PATH "./serv_hash_block.dat"
 #define SERVICIOS_HASH_TABLA_PATH "./serv_hash_table.dat"

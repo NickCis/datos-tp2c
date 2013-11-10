@@ -3,9 +3,12 @@
 #include "hash_extensible.h"
 #include "config.h"
 #include "serializador.h"
+#include "arbolbmas.h"
+#include "lista_invertida.h"
 
 // Hash usado para guardar en disco a los usuarios
 static THashExtensible* hash_usuarios = NULL;
+static TArbolBM* indice_t_u = NULL;
 
 struct TUsuario {
 	unsigned int dni;
@@ -16,6 +19,7 @@ struct TUsuario {
 	char *pass;
 	char *prov;
 	char t_u;
+	char t_u_ant;
 };
 
 unsigned int Usuarios_get_id(uint8_t* ele, size_t size){
@@ -42,6 +46,63 @@ static uint8_t* _userBufDesdeData(
 	size_t *size_out
 );
 
+/** Agrega un elemento al indice.
+ */
+static void _insertarIdIndiceTU(unsigned int dni, char t_u){
+	long lista_ref;
+	TListaInvertida* lista = ListaInvertida_crear(USUARIOS_LISTA_T_U, USUARIOS_LISTA_T_U_BAJA, USUARIOS_LISTA_BLOCK);
+
+	if(Arbol_get(indice_t_u, t_u, &lista_ref)){
+		lista_ref = ListaInvertida_new(lista);
+		Arbol_insertar(indice_t_u, t_u, lista_ref);
+	}
+
+	ListaInvertida_set(lista, lista_ref);
+	ListaInvertida_agregar(lista, (uint8_t*) &(dni), sizeof(unsigned int));
+	ListaInvertida_escribir(lista);
+	ListaInvertida_destruir(lista);
+}
+
+static void _removerIdIndiceTU(unsigned int dni, char t_u){
+	long lista_ref;
+	TListaInvertida* lista = ListaInvertida_crear(USUARIOS_LISTA_T_U, USUARIOS_LISTA_T_U_BAJA, USUARIOS_LISTA_BLOCK);
+
+	if(Arbol_get(indice_t_u, t_u, &lista_ref)){
+		return;
+	}
+
+	ListaInvertida_set(lista, lista_ref);
+
+	// TODO: reemplazar por lista
+	unsigned int aux[255];
+	uint8_t* aux_b;
+	size_t aux_s;
+	int i = 0;
+
+	while( (aux_b = ListaInvertida_get(lista, &aux_s))){
+		aux[i] = * ((unsigned int*) aux_b);
+		if(aux[i] != dni)
+			i++;
+		free(aux_b);
+	}
+
+	ListaInvertida_set(lista, lista_ref);
+	ListaInvertida_erase(lista);
+
+	lista_ref = ListaInvertida_new(lista);
+
+	int k;
+	for(k=0 ; k < i ; k++){
+		ListaInvertida_agregar(lista, (uint8_t*) &(aux[k]), sizeof(unsigned int));
+	}
+
+	ListaInvertida_escribir(lista);
+	ListaInvertida_destruir(lista);
+
+	Arbol_remover(indice_t_u, t_u);
+	Arbol_insertar(indice_t_u, t_u, lista_ref);
+}
+
 int Usuarios_init(){
 	hash_usuarios = HashExtensible_crear(
 		USUARIOS_HASH_BLOQUE_PATH,
@@ -55,12 +116,16 @@ int Usuarios_init(){
 	if(!hash_usuarios)
 		return 1;
 
+	indice_t_u = Arbol_crear(USUARIOS_INDICE_T_U_PATH, USUARIOS_ARBM_TU_ORDEN);
+
 	return 0;
 }
 
 int Usuarios_end(){
 	HashExtensible_destruir(hash_usuarios);
 	hash_usuarios = NULL;
+	Arbol_destruir(indice_t_u);
+	indice_t_u = NULL;
 	return 0;
 }
 
@@ -91,6 +156,8 @@ TUsuario* Usuario_new(
 		free(buf);
 		return NULL;
 	}
+
+	_insertarIdIndiceTU(dni, t_u);
 
 	TUsuario* user = _usuarioDesdeBuf(buf, size);
 	free(buf);
@@ -315,6 +382,7 @@ int Usuario_set_tipo(TUsuario* this, char t_u){
 		return 1;
 	if(t_u != 'u' && t_u != 'a' && t_u != 'p')
 		return 1;
+	this->t_u_ant = this->t_u;
 	this->t_u = t_u;
 	return 0;
 }
@@ -347,6 +415,12 @@ int Usuario_store(TUsuario* this){
 		return 1;
 	}
 
+	if(this->t_u != this->t_u_ant){ //Actualizo el indice por t_u
+		_removerIdIndiceTU(this->dni, this->t_u_ant);
+		_insertarIdIndiceTU(this->dni, this->t_u);
+		this->t_u_ant = this->t_u;
+	}
+
 	free(buf);
 	return 0;
 }
@@ -358,4 +432,33 @@ TUsuario* Usuario_del(unsigned int dni){
 	free(buf);
 
 	return user;
+}
+
+unsigned int* Usuario_from_t_u(char t_u, size_t *len){
+	long lista_ref;
+	if(Arbol_get(indice_t_u, t_u, &lista_ref)){
+		return NULL;
+	}
+
+	TListaInvertida* lista = ListaInvertida_crear(USUARIOS_LISTA_T_U, USUARIOS_LISTA_T_U_BAJA, USUARIOS_LISTA_BLOCK);
+
+	ListaInvertida_set(lista, lista_ref);
+
+	unsigned int aux[255];
+	uint8_t* aux_b;
+	size_t aux_s;
+	int i = 0;
+
+	while( (aux_b = ListaInvertida_get(lista, &aux_s))){
+		aux[i++] = * ((unsigned int*) aux_b);
+		free(aux_b);
+	}
+
+	unsigned int *ret = (unsigned int*) malloc(sizeof(unsigned int) * i);
+	*len = i;
+	int k;
+	for(k=0 ; k < i ; k++)
+		ret[k] = aux[k];
+
+	return ret;
 }
