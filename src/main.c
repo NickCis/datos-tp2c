@@ -859,7 +859,7 @@ void get_time(char* fecha, char*hora){
 }
 
 void imprimir_consulta(TConsulta* con){
-	if(Consulta_get_oculta(con))
+	if(!Consulta_get_oculta(con))
 		return;
 	printf("Consulta #%d\n", Consulta_get_id(con));
 	printf("\tServicio #%d\n", Consulta_get_id_serv(con));
@@ -879,7 +879,7 @@ void imprimir_consulta(TConsulta* con){
 void contestar_consulta(unsigned int id_c){
 	// TODO: validar qe servicio sea del provedor
 	if(!id_c){
-		printf("Desea contestar alguna consulta?\n");
+		printf("Ingrese id de consulta a contestar:\n");
 		id_c = get_dni();
 	}
 	if(!id_c){
