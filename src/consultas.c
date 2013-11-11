@@ -5,9 +5,13 @@
 #include "serializador.h"
 #include "autoincrement.h"
 #include "rtt.h"
+#include "arbolbmas.h"
+#include "lista_invertida.h"
 
 static THashExtensible* hash_consultas = NULL;
 static unsigned int consultas_last_id = 0;
+static TArbolBM* indice_serv = NULL;
+static TArbolBM* indice_usu = NULL;
 
 struct TConsulta {
 	unsigned int id;
@@ -38,6 +42,36 @@ static TRtt* _rtt(){
 		CONSULTAS_RTT_ARB_ORDEN,
 		CONSULTAS_RTT_BLOCK
 	);
+}
+
+static void _insertarIdIndiceServ(unsigned int id, unsigned id_serv){
+	long lista_ref;
+	TListaInvertida* lista = ListaInvertida_crear(CONSULTAS_LISTA_SERV, CONSULTAS_LISTA_SERV_BAJA, CONSULTAS_LISTA_SERV_BLOCK);
+
+	if(Arbol_get(indice_serv, id_serv, &lista_ref)){
+		lista_ref = ListaInvertida_new(lista);
+		Arbol_insertar(indice_serv, id_serv, lista_ref);
+	}
+
+	ListaInvertida_set(lista, lista_ref);
+	ListaInvertida_agregar(lista, (uint8_t*) &(id), sizeof(unsigned int));
+	ListaInvertida_escribir(lista);
+	ListaInvertida_destruir(lista);
+}
+
+static void _insertarIdIndiceUsu(unsigned int id, unsigned id_usu){
+	long lista_ref;
+	TListaInvertida* lista = ListaInvertida_crear(CONSULTAS_LISTA_USU, CONSULTAS_LISTA_USU_BAJA, CONSULTAS_LISTA_USU_BLOCK);
+
+	if(Arbol_get(indice_usu, id_usu, &lista_ref)){
+		lista_ref = ListaInvertida_new(lista);
+		Arbol_insertar(indice_usu, id_usu, lista_ref);
+	}
+
+	ListaInvertida_set(lista, lista_ref);
+	ListaInvertida_agregar(lista, (uint8_t*) &(id), sizeof(unsigned int));
+	ListaInvertida_escribir(lista);
+	ListaInvertida_destruir(lista);
 }
 
 static TConsulta* _consultaDesdeBuf(uint8_t* buf, size_t size);
@@ -72,6 +106,9 @@ int Consultas_init(){
 
 	consultas_last_id = getLastId(CONSULTAS_LAST_ID_FILE);
 
+	indice_serv = Arbol_crear(CONSULTAS_INDICE_SERV_PATH, CONSULTAS_ARBM_SERV_ORDEN);
+	indice_usu = Arbol_crear(CONSULTAS_INDICE_USU_PATH, CONSULTAS_ARBM_USU_ORDEN);
+
 	return 0;
 }
 
@@ -80,6 +117,11 @@ int Consultas_end(){
 	writeLastId(CONSULTAS_LAST_ID_FILE, consultas_last_id);
 	hash_consultas = NULL;
 	consultas_last_id = 0;
+
+	Arbol_destruir(indice_serv);
+	indice_serv = NULL;
+	Arbol_destruir(indice_usu);
+	indice_usu = NULL;
 	return 0;
 }
 
@@ -119,6 +161,9 @@ TConsulta* Consulta_new(
 	Rtt_agregar_texto(rtt, last_id+1, consulta);
 	Rtt_generar_indice(rtt);
 	Rtt_destruir(rtt);
+
+	_insertarIdIndiceServ(last_id+1, id_serv);
+	_insertarIdIndiceUsu(last_id+1, dni);
 
 	consultas_last_id++;
 	return cons;
@@ -409,5 +454,63 @@ unsigned int* Consulta_buscar(char* t, size_t* len){
 	TRtt* rtt = _rtt();
 	ret = (unsigned int*) Rtt_buscar(rtt, t, len);
 	Rtt_destruir(rtt);
+	return ret;
+}
+
+unsigned int* Consulta_from_dni(unsigned int dni, size_t *len){
+	long lista_ref;
+	if(Arbol_get(indice_usu, dni, &lista_ref)){
+		return NULL;
+	}
+
+	TListaInvertida* lista = ListaInvertida_crear(CONSULTAS_LISTA_USU, CONSULTAS_LISTA_USU_BAJA, CONSULTAS_LISTA_USU_BLOCK);
+
+	ListaInvertida_set(lista, lista_ref);
+
+	unsigned int aux[255];
+	uint8_t* aux_b;
+	size_t aux_s;
+	int i = 0;
+
+	while( (aux_b = ListaInvertida_get(lista, &aux_s))){
+		aux[i++] = * ((unsigned int*) aux_b);
+		free(aux_b);
+	}
+
+	unsigned int *ret = (unsigned int*) malloc(sizeof(unsigned int) * i);
+	*len = i;
+	int k;
+	for(k=0 ; k < i ; k++)
+		ret[k] = aux[k];
+
+	return ret;
+}
+
+unsigned int* Consulta_from_serv(unsigned int id_serv, size_t *len){
+	long lista_ref;
+	if(Arbol_get(indice_serv, id_serv, &lista_ref)){
+		return NULL;
+	}
+
+	TListaInvertida* lista = ListaInvertida_crear(CONSULTAS_LISTA_SERV, CONSULTAS_LISTA_SERV_BAJA, CONSULTAS_LISTA_SERV_BLOCK);
+
+	ListaInvertida_set(lista, lista_ref);
+
+	unsigned int aux[255];
+	uint8_t* aux_b;
+	size_t aux_s;
+	int i = 0;
+
+	while( (aux_b = ListaInvertida_get(lista, &aux_s))){
+		aux[i++] = * ((unsigned int*) aux_b);
+		free(aux_b);
+	}
+
+	unsigned int *ret = (unsigned int*) malloc(sizeof(unsigned int) * i);
+	*len = i;
+	int k;
+	for(k=0 ; k < i ; k++)
+		ret[k] = aux[k];
+
 	return ret;
 }

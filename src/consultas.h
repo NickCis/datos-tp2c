@@ -33,6 +33,9 @@ TConsulta* Consulta_del(unsigned int id);
 
 unsigned int* Consulta_buscar(char* t, size_t* len);
 
+unsigned int* Consulta_from_dni(unsigned int dni, size_t *len);
+unsigned int* Consulta_from_serv(unsigned int id_serv, size_t *len);
+
 /** Metodos para obtener/modificar informacion del usuario.
  * Los sets devuelve 0 si salio todo bien.
  */

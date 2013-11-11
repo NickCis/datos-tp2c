@@ -62,5 +62,15 @@
 #define CONSULTAS_RTT_LISTA_BAJA "./con_rtt_lista_baja.dat"
 #define CONSULTAS_RTT_ARB_ORDEN (64)
 #define CONSULTAS_RTT_BLOCK (512)
+#define CONSULTAS_LISTA_SERV "./con_serv_lista_cat.dat"
+#define CONSULTAS_LISTA_SERV_BAJA "./con_serv_lista_cat_baja.dat"
+#define CONSULTAS_LISTA_SERV_BLOCK (512)
+#define CONSULTAS_INDICE_SERV_PATH "./con_arbm_serv.dat"
+#define CONSULTAS_ARBM_SERV_ORDEN (64)
+#define CONSULTAS_LISTA_USU "./con_usu_lista_cat.dat"
+#define CONSULTAS_LISTA_USU_BAJA "./con_usu_lista_cat_baja.dat"
+#define CONSULTAS_LISTA_USU_BLOCK (512)
+#define CONSULTAS_INDICE_USU_PATH "./con_arbm_usu.dat"
+#define CONSULTAS_ARBM_USU_ORDEN (64)
 
 #endif
