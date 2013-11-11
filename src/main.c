@@ -19,6 +19,7 @@ void crear_servicio(TUsuario* user);
 void borrar_servicio(TUsuario* user);
 void buscar_servicio(TUsuario* user);
 void imprimir_servicio(TServicio* serv);
+void imprimir_consulta(TConsulta* con);
 void menu_pos_busqueda_de_servicio(TUsuario* user, unsigned int idserv);
 void nueva_consulta(TUsuario* user, TServicio* serv);
 void nueva_cotizacion(TUsuario* user, TServicio* serv);
@@ -194,6 +195,7 @@ void menu_conectado_usuario(TUsuario* user){
 		printf("2 - Darse de baja\n");
 		printf("3 - Buscar Servicio\n");
 		printf("4 - Convertirse en provedor\n");
+		printf("5 - Listar sus consultas\n");
 		printf("s - Salir\n");
 		printf("Seleccione opcion\n");
 		char opt = read_opt();
@@ -218,6 +220,19 @@ void menu_conectado_usuario(TUsuario* user){
 				Usuario_store(user);
 				return;
 				break;
+
+			case '5':{
+				size_t len;
+				unsigned int* cons = Consulta_from_dni(Usuario_get_dni(user), &len);
+				size_t i;
+				for(i=0; i < len; i++){
+					TConsulta* con = Consulta_from_id(cons[i]);
+					imprimir_consulta(con);
+					Consulta_free(con);
+				}
+				free(cons);
+				break;
+			}
 
 			default:
 				break;
@@ -804,4 +819,22 @@ void get_time(char* fecha, char*hora){
 	timeinfo = localtime (&rawtime);
 	strftime(fecha, 9, "%Y%m%d", timeinfo);
 	strftime(hora, 5, "%H%M", timeinfo);
+}
+
+void imprimir_consulta(TConsulta* con){
+	if(Consulta_get_oculta(con))
+		return;
+	printf("Consulta #%d\n", Consulta_get_id(con));
+	printf("\tServicio #%d\n", Consulta_get_id_serv(con));
+	printf("\tDni #%d\n", Consulta_get_dni(con));
+	printf("\tConsulta: '%s'\n", Consulta_get_consulta(con));
+	printf("\tFecha: %s\n", Consulta_get_fecha(con));
+	printf("\tHora: %s\n", Consulta_get_hora(con));
+	if(Consulta_get_hay_rta(con)){
+		printf("\tRta: '%s'\n", Consulta_get_rta(con));
+		printf("\tFecha: %s\n", Consulta_get_rta_fecha(con));
+		printf("\tHora: %s\n", Consulta_get_rta_hora(con));
+	}else{
+		printf("\tNo hay rta\n");
+	}
 }
