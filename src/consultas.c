@@ -4,6 +4,7 @@
 #include "config.h"
 #include "serializador.h"
 #include "autoincrement.h"
+#include "rtt.h"
 
 static THashExtensible* hash_consultas = NULL;
 static unsigned int consultas_last_id = 0;
@@ -25,6 +26,18 @@ struct TConsulta {
 unsigned int Consultas_get_id(uint8_t* ele, size_t size){
 	unsigned int id = * ( (unsigned int*) ele);
 	return id;
+}
+
+static TRtt* _rtt(){
+	return Rtt_crear(
+		CONSULTAS_RTT_OCU_APA,
+		CONSULTAS_RTT_OCU_DOC,
+		CONSULTAS_RTT_ARB,
+		CONSULTAS_RTT_LISTA,
+		CONSULTAS_RTT_LISTA_BAJA,
+		CONSULTAS_RTT_ARB_ORDEN,
+		CONSULTAS_RTT_BLOCK
+	);
 }
 
 static TConsulta* _consultaDesdeBuf(uint8_t* buf, size_t size);
@@ -101,6 +114,11 @@ TConsulta* Consulta_new(
 
 	TConsulta* cons = _consultaDesdeBuf(buf, size);
 	free(buf);
+
+	TRtt* rtt = _rtt();
+	Rtt_agregar_texto(rtt, last_id+1, consulta);
+	Rtt_generar_indice(rtt);
+	Rtt_destruir(rtt);
 
 	consultas_last_id++;
 	return cons;
@@ -386,3 +404,10 @@ int Consultas_store(TConsulta* this){
 	return 0;
 }
 
+unsigned int* Consulta_buscar(char* t, size_t* len){
+	unsigned int* ret;
+	TRtt* rtt = _rtt();
+	ret = (unsigned int*) Rtt_buscar(rtt, t, len);
+	Rtt_destruir(rtt);
+	return ret;
+}

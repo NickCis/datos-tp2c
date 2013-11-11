@@ -6,6 +6,7 @@
 #include "consultas.h"
 #include "cotizaciones.h"
 #include "categorias.h"
+#include <time.h>
 
 void conectarse();
 void crear_usuario(char t_u);
@@ -23,6 +24,7 @@ void nueva_consulta(TUsuario* user, TServicio* serv);
 void nueva_cotizacion(TUsuario* user, TServicio* serv);
 void list_categorias();
 void list_usuarios(char t_u);
+void get_time(char* fecha, char*hora);
 
 int borrar_usuario(unsigned int dni);
 
@@ -408,9 +410,32 @@ void buscar_servicio(TUsuario* user){
 				break;
 			}
 
-			case '6':
-				printf("TODO:\n");
+			case '6':{
+				unsigned int* cons;
+				size_t len;
+				char t[256];
+				size_t i;
+
+				printf("Ingrese palabra:\n");
+				read_str(t, 255);
+
+				cons = Consulta_buscar(t, &len);
+				if(!cons){
+					printf("no se encontro\n");
+					break;
+				}
+				for(i=0; i < len; i++){
+					TConsulta* con = Consulta_from_id(cons[i]);
+					printf("Consulta #%d\n", Consulta_get_id(con));
+					printf("\tServicio #%d\n", Consulta_get_id_serv(con));
+					printf("\tDni: %d\n", Consulta_get_dni(con));
+					printf("\tConsulta: '%s'\n", Consulta_get_consulta(con));
+					Consulta_free(con);
+				}
+				free(cons);
+				menu_pos_busqueda_de_servicio(user, 0);
 				break;
+			}
 
 			default:
 				break;
@@ -449,10 +474,12 @@ void menu_pos_busqueda_de_servicio(TUsuario* user, unsigned int idserv){
 
 void nueva_consulta(TUsuario* user, TServicio* serv){
 	char consulta[301];
-	char fecha[9] = "06112013";
-	char hora[5] = "0529";
+	char fecha[9];
+	char hora[5];
 	printf("Ingrese Consulta:\n");
 	read_str(consulta, 300);
+
+	get_time(fecha, hora);
 
 	TConsulta* cons = Consulta_new(
 		Servicio_get_id(serv),
@@ -768,4 +795,13 @@ void list_usuarios(char t_u){
 		}
 	}
 	free(ids);
+}
+
+void get_time(char* fecha, char*hora){
+	time_t rawtime;
+	struct tm * timeinfo;
+	time (&rawtime);
+	timeinfo = localtime (&rawtime);
+	strftime(fecha, 9, "%Y%m%d", timeinfo);
+	strftime(hora, 5, "%H%M", timeinfo);
 }

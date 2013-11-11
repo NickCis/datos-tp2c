@@ -1,5 +1,6 @@
 #ifndef __CONSULTAS_H__
 #define __CONSULTAS_H__
+#include <stdlib.h>
 
 typedef struct TConsulta TConsulta;
 
@@ -29,6 +30,8 @@ TConsulta* Consulta_from_id(unsigned int id);
 /** Borra un servicio
  */
 TConsulta* Consulta_del(unsigned int id);
+
+unsigned int* Consulta_buscar(char* t, size_t* len);
 
 /** Metodos para obtener/modificar informacion del usuario.
  * Los sets devuelve 0 si salio todo bien.

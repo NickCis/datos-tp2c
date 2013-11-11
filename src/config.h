@@ -55,5 +55,12 @@
 #define CONSULTAS_HASH_BAJA_PATH "./con_hash_baja.dat"
 #define CONSULTAS_HASH_BLOQUE_SIZE (512)
 #define CONSULTAS_LAST_ID_FILE "./con_last_id.dat"
+#define CONSULTAS_RTT_OCU_APA "./con_rtt_ocu_apa.dat"
+#define CONSULTAS_RTT_OCU_DOC "./con_rtt_ocu_doc.dat"
+#define CONSULTAS_RTT_ARB "./con_rtt_arb.dat"
+#define CONSULTAS_RTT_LISTA "./con_rtt_lista.dat"
+#define CONSULTAS_RTT_LISTA_BAJA "./con_rtt_lista_baja.dat"
+#define CONSULTAS_RTT_ARB_ORDEN (64)
+#define CONSULTAS_RTT_BLOCK (512)
 
 #endif
