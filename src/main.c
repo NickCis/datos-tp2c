@@ -28,6 +28,7 @@ void list_usuarios(char t_u);
 void get_time(char* fecha, char*hora);
 
 int borrar_usuario(unsigned int dni);
+void contestar_consulta(unsigned int id_c);
 
 int main(int argc, char* argv[]){
 	Usuarios_init();
@@ -526,6 +527,21 @@ void imprimir_servicio(TServicio* serv){
 	printf("\tnombre: '%s'\n", Servicio_get_nombre(serv));
 	printf("\tdesc: '%s'\n", Servicio_get_descripcion(serv));
 	printf("\ttipo: '%c'\n", Servicio_get_tipo(serv));
+
+	size_t len;
+	unsigned int* cons = Consulta_from_serv(Servicio_get_id(serv), &len);
+	size_t i;
+	if(len)
+		printf(" --- Consultas --- \n");
+	for(i=0; i < len; i++){
+		TConsulta* con = Consulta_from_id(cons[i]);
+		imprimir_consulta(con);
+		Consulta_free(con);
+	}
+	free(cons);
+
+	if(len)
+		printf(" ---------- \n");
 }
 
 void menu_conectado_provedor(TUsuario* user){
@@ -567,7 +583,7 @@ void menu_conectado_provedor(TUsuario* user){
 					imprimir_servicio(serv);
 					Servicio_free(serv);
 				}
-				
+				contestar_consulta(0);
 				break;
 			}
 			case '6':{
@@ -754,8 +770,30 @@ void menu_conectado_admin(TUsuario* user){
 				}
 				break;
 			}
-			case '7':
+			case '7':{
+				printf("Ingrese id de consulta:\n");
+				unsigned int id_c = get_dni();
+				if(!id_c){
+					printf("Id invalido\n");
+					return;
+				}
+
+				TConsulta* cons = Consulta_from_id(id_c);
+				if(!cons){
+					printf("Consulta inexistente\n");
+					return;
+				}
+
+				imprimir_consulta(cons);
+				printf("Desea ocultarla?(0 no, 1 si)\n");
+				unsigned int o = get_dni();
+				char oc = o ? 1 : 0;
+				Consulta_set_oculta(cons, oc);
+				Consulta_store(cons);
+				Consulta_free(cons);
+
 				break;
+			}
 
 			default:
 				break;
@@ -837,4 +875,37 @@ void imprimir_consulta(TConsulta* con){
 	}else{
 		printf("\tNo hay rta\n");
 	}
+}
+
+void contestar_consulta(unsigned int id_c){
+	// TODO: validar qe servicio sea del provedor
+	if(!id_c){
+		printf("Desea contestar alguna consulta?\n");
+		id_c = get_dni();
+	}
+	if(!id_c){
+		printf("Id invalido\n");
+		return;
+	}
+
+	TConsulta* cons = Consulta_from_id(id_c);
+	if(!cons){
+		printf("Consulta inexistente\n");
+		return;
+	}
+	char fecha[9];
+	char hora[5];
+	char rta[301];
+
+	get_time(fecha, hora);
+
+	printf("Ingrese Rta:\n");
+	read_str(rta, 300);
+	Consulta_set_hay_rta(cons, 1);
+	Consulta_set_rta(cons, rta);
+	Consulta_set_rta_fecha(cons, fecha);
+	Consulta_set_rta_hora(cons, hora);
+
+	Consulta_store(cons);
+	Consulta_free(cons);
 }

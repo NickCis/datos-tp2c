@@ -514,3 +514,38 @@ unsigned int* Consulta_from_serv(unsigned int id_serv, size_t *len){
 
 	return ret;
 }
+
+int Consulta_store(TConsulta* this){
+	if(!this)
+		return 1;
+
+	size_t size = 0;
+	uint8_t* buf =  HashExtensible_del(hash_consultas, this->id, &size);
+	if(!buf)
+		return 1;
+
+	free(buf);
+
+	buf = _consBufDesdeData(
+		this->id,
+		this->id_serv,
+		this->dni,
+		this->consulta,
+		this->fecha,
+		this->hora,
+		this->hay_rta,
+		this->rta,
+		this->rta_fecha,
+		this->rta_hora,
+		this->oculta,
+		&size
+	);
+
+	if(HashExtensible_insertar(hash_consultas, buf, size)){
+		free(buf);
+		return 1;
+	}
+
+	free(buf);
+	return 0;
+}
