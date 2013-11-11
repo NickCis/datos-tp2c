@@ -531,17 +531,16 @@ void imprimir_servicio(TServicio* serv){
 	size_t len;
 	unsigned int* cons = Consulta_from_serv(Servicio_get_id(serv), &len);
 	size_t i;
-	if(len)
+	if(cons){
 		printf(" --- Consultas --- \n");
-	for(i=0; i < len; i++){
-		TConsulta* con = Consulta_from_id(cons[i]);
-		imprimir_consulta(con);
-		Consulta_free(con);
-	}
-	free(cons);
-
-	if(len)
+		for(i=0; i < len; i++){
+			TConsulta* con = Consulta_from_id(cons[i]);
+			imprimir_consulta(con);
+			Consulta_free(con);
+		}
+		free(cons);
 		printf(" ---------- \n");
+	}
 }
 
 void menu_conectado_provedor(TUsuario* user){
