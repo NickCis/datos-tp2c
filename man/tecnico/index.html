@@ -1,0 +1,296 @@
+<!DOCTYPE HTML>
+<html lang="es">
+
+<head>
+	<meta charset="utf-8">
+	<title>Documentaci&oacute;n T&eacute;cnica</title>
+	<link rel="stylesheet" href="estilos.css" />
+</head>
+
+<body>
+
+<header>
+<a href="Grupo Xion" target="_blank"><img border="0" src="imagenes/fiuba.png"/></a>
+<a href="Grupo Xion" target="_blank" style="float:right;">Grupo Xion</a>
+</header>
+
+<span id="version_producto">07/12/2013 18:00:00</span>
+
+<div id="contenedor_general">
+
+<span id="manual_tit">Documentaci&oacute;n T&eacute;cnica</span>
+
+<article>
+<span class="titulo">Contenidos</span>
+<ol>
+	<li><a href="#Integrantes" class="indice_entrada">Integrantes</a></li>
+	<li><a href="#Descripción_general" class="indice_entrada">Descripción general</a></li>
+	<li><a href="#Funcionalidad" class="indice_entrada">Funcionalidad</a></li>
+	<li><a href="#fisica" class="indice_entrada">Capa F&iacute;sica</a></li>
+	<li><a href="#logica" class="indice_entrada">Capa L&oacute;gica</a></li>
+	<li><a href="#aplicacion" class="indice_entrada">Capa Aplicaci&oacute;n</a></li>
+	<li><a href="#Código_fuente" class="indice_entrada">Código fuente</a></li>
+</ol>
+</article>
+
+<article id="indice_">
+<img id="indiceico" src="imagenes/indiceico.png" />
+<div id="indice_margen"></div>
+<span class="titulo">Contenidos</span>
+<div id="indice_scroll">
+	<ol>
+		<li><a href="#Integrantes" class="indice_entrada">Integrantes</a></li>
+		<li><a href="#Descripcion_general" class="indice_entrada">Descripci&oacute;n general</a></li>
+		<li><a href="#Funcionalidad" class="indice_entrada">Funcionalidad</a></li>
+		<li><a href="#fisica" class="indice_entrada">Capa F&iacute;sica</a></li>
+		<li><a href="#logica" class="indice_entrada">Capa L&oacute;gica</a></li>
+		<li><a href="#aplicacion" class="indice_entrada">Capa Aplicaci&oacute;n</a></li>
+		<li><a href="#Código_fuente" class="indice_entrada">Código fuente</a></li>
+	</ol>
+</div>
+</article>
+
+<!-- inicio contenido -->
+
+<article id="Integrantes">
+<span class="titulo">Integrantes</span>
+<strong>Patricio Hours</strong>
+<ul>
+	<li><strong>Padr&oacute;n:</strong> 72821</li>
+	<li><strong>Mail:</strong> phours@hotmail.com</li>
+	<li><strong>Github:</strong> phours</li>
+	<li><strong>Cel:</strong> 1157546504</li>
+</ul>
+<strong>Nicolas Cisco</strong>
+<ul>
+	<li><strong>Padr&oacute;n:</strong> 94173</li>
+	<li><strong>Mail:</strong> ncis20@gmail.com.com</li>
+	<li><strong>Github:</strong> nickcis</li>
+	<li><strong>Cel:</strong> 1169597983</li>
+</ul>
+</article>
+
+<article id="Descripcion_general">
+
+<span class="titulo">Descripci&oacute;n General</span> 
+<p>Se tuvo que desarrollar e implementar una soluci&oacute;n para albergar datos y realizar una serie de operaci&oacute;nes sobre ellos para una empresa de servicios de publicaci&oacute;n de anuncios clasificados. El esquema de la aplicaci&oacute;n soliitado es el siguiente:</p>
+<img src="imagenes/esquema.png" />
+<p>Para ello se decidi&oacute; dividir la aplicaci&oacute;n en tres secciones:</p>
+<ul>
+	<li><strong>Capa F&iacute;ica:</strong> m&oacute;dulos que que administran, crean y modifican las estructuras f&iacute;sicas en disco, representan a las organizaciones de archivos.</li>
+	<li><strong>Capa L&oacute;gica:</strong> m&oacute;dulos que administran, crena y modifican las estructuras l&oacute;gicas de indexaci&oacute;n. Brindan interfaces para los componentes de la capa f&iacute;sica.</li>
+	<li><strong>Capa Aplicaci&oacute;n:</strong> m&oacute;dulos que permiten la interacci&oacute;n entre usuarios del sistema y &eacute;ste.</li>
+</ul>
+
+</article>
+
+
+
+<article id="Funcionalidad">
+<span class="titulo">Funcionalidad </span>
+<span>Implementada</span>
+<ul>
+	<li><strong></strong></li>
+</ul>
+<span>Faltante</span>
+<ul>
+	<li>Aministraci&oacute;n de Espacio Libre con listas encadenadas</li>
+	<li>En las partes de RTT cuando se dan de baja elementos, no se borran las referencias en el RTT</li>
+</ul>
+</article>
+
+
+<article id="fisica">
+<span class="titulo">Capa F&iacute;sica</span>
+<span>Serializador (serializador.h)</span>
+<p>Los registros se implementaron mediante el uso de un buffer gen&eacute;rico, se trabaj&oacute; utilizando directamente un <i>char*</i>. Para des/serializarlos se decidi&oacute; implementar un serializador.</p>
+<p>Primitivas Implementadas:</p>
+<ul>
+	<li><strong>Serializador_pack:</strong> Genera  un buffer serializado, agrega informaci&oacute;n.</li>
+	<li><strong>Serializador_unpack:</strong> Deserializa la informaci&oacute;n</li>
+</ul>
+<span>Bloque (bloque.h)</span>
+<p>Los bloques se implementaron elaborando un tipo de dato abstracto llamado <strong>TBloque</strong>.</p>
+<p>Primitivas Implementadas:</p>
+<ul>
+	<li><strong>Bloque_crear:</strong> Crea bloque de registros de longitud variable</li>
+	<li><strong>BloqueFijo_crear:</strong> Crea bloque de registros de longitud fija.</li>
+	<li><strong>Bloque_leer:</strong> Lee Bloque de archivo.</li>
+	<li><strong>Bloque_escribir:</strong> Escribe bloque a archivo.</li>
+	<li><strong>Bloque_agregar_buf:</strong> Agrega un buffer de informaci&oacute;n al bloque.</li>
+	<li><strong>BloqueFijo_agregar_buf:</strong> Agrega un buffer de informaci&oacute;n al bloque.</li>
+	<li><strong>Bloque_libre:</strong> Devuelve si el bloque tiene espacio libre para escribir.</li>
+	<li><strong>BloqueFijo_libre:</strong> Devuelve si el bloque tiene espacio libre para escribir</li>
+	<li><strong>Bloque_lleno:</strong> Devuelve si el bloque esta lleno teniendo en cuenta el porcentage establecido.</li>
+	<li><strong>Bloque_get_buf:</strong> Devuelve el Buff (registro) n&uacute;mero n que est&eacute; en el buffer.</li>
+	<li><strong>Bloque_destruir:</strong> Destruye bloque (entidad en memoria).</li>
+</ul>
+<span>Archivo de Bloques (archivo_bloque.h)</span>
+<p>Los archivos de bloques se implementaron elaborando un tipo de dato abstracto llamado <strong>TArchivo</strong>. Este internamente usa a la entidad TBloque.</p>
+<p>Primitivas Implementadas:</p>
+<ul>
+	<li><strong>Archivo_crear:</strong> Crea Archivo de bloques de registros de longitud variable (sin administraci&oacute;n de espacio libre).</li>
+	<li><strong>ArchivoFijo_crear:</strong> Crea Archivo de bloques de registros de longitud fija(sin administraci&oacute;n de espacio libre).</li>
+	<li><strong>Archivo_crear_adm:</strong> Crea Archivo de bloques de registros de longitud variable (con admi.</li>
+	<li><strong>ArchivoFijo_crear_adm:</strong> Crea Archivo de bloques de registros de longitud fija.</li>
+	<li><strong>Archivo_bloque_seek:</strong> Seekea por bloques.</li>
+	<li><strong>Archivo_bloque_new:</strong> Destruye el bloque que esta actualmente en memoria y crea uno vacio en memoria.</li>
+	<li><strong>Archivo_bloque_leer:</strong> Lee bloque del archivo.</li>
+	<li><strong>Archivo_get_buf:</strong> Devuelve un buffer (registro) del bloque abierto, de finalizar el bloque lee el bloque siguiente y devuelve un buffer (registro).</li>
+	<li><strong>Archivo_get_bloque_buf:</strong> Devuelve buffer del bloque abierto. Se considera error que ya se hallan leido todos los registros del bloque.</li>
+	<li><strong>Archivo_bloque_get_buf:</strong> Devuelve el Buff (registro) numero n que este en el buffer.</li>
+	<li><strong>Archivo_agregar_buf:</strong> Agrega un buffer de informaci&oacute;n al archivo. De llenarse el bloque actual, lo escribe a disco y crea uno nuevo.</li>
+	<li><strong>ArchivoFijo_agregar_buf:</strong> Agrega un buffer de informaci&oacute;n al archivo. De llenarse el bloque actual, lo escribe a disco y crea uno nuevo.</li>
+	<li><strong>Archivo_bloque_libre:</strong> Devuelve si el bloque corriente tiene espacio libre para escribir.</li>
+	<li><strong>ArchivoFijo_bloque_libre:</strong> Devuelve si el bloque corriente tiene espacio libre para escribir.</li>
+	<li><strong>Archivo_libre:</strong> Devuelve si el bloque n esta lleno (utilizando la logica del mapa de bits)</li>
+	<li><strong>Archivo_bloque_agregar_buf:</strong> Agrega un buffer de informaci&oacute;n al bloque corriente.</li>
+	<li><strong>ArchivoFijo_bloque_agregar_buf:</strong> Agrega un buffer de informaci&oacute;n al bloque corriente.</li>
+	<li><strong>Archivo_flush:</strong> Fuerza la escritura del bloque actual a disco.</li>
+	<li><strong>Archivo_close:</strong> Cierra Archivo.</li>
+	<li><strong>Archivo_open:</strong> Abre Archivo (sirve para cuando fue cerrado por el usuario).</li>
+	<li><strong>Archivo_get_cur_bloque:</strong> Devuelve el numero del bloque en el que esta parado el fd.</li>
+	<li><strong>Archivo_destruir:</strong> Destruye Archivo (entidad en memoria).</li>
+	<li><strong>Archivo_cant_bloque:</strong> Devuelve cantidad de bloques que tiene el archivo.</li>
+</ul>
+<span>Archivo de Registros (archivo_registro.h)</span>
+<p>Los archivos de registros se implementaron elaborando un tipo de dato abstracto llamado <strong>TArchivoReg</strong>.</p>
+<p>Primitivas Implementadas:</p>
+<ul>
+	<li><strong>ArchivoReg_crear:</strong> Crea Archivo de registros.</li>
+	<li><strong>ArchivoReg_leer:</strong> Lee registro y lo devuelve.</li>
+	<li><strong>ArchivoReg_escribir:</strong> Escribe buffer(registro) en el archivo.</li>
+	<li><strong>ArchivoReg_destruir:</strong> Destruye Archivo (entidad en memoria).</li>
+	<li><strong>ArchivoReg_seek_end:</strong> Seekea el final del archivo.</li>
+	<li><strong>ArchivoReg_seek_start:</strong> Seekea al principio del archivo.</li>
+</ul>
+<div class="nota">
+	<p>Todos los archivos cabecera (.h) de las entidades descriptas anteriormente, se encuentran comentados siguiendo las reglas Doxygen. Para tener mas informaci&oacute;n respecto a los par&acute;metros y funcionamiento de estas, por favor, leer los <i>.h</i>.</p>
+</div>
+</article>
+
+<article id="logica">
+<span class="titulo">Capa L&oacute;gica</span>
+<span>Hash Extensible (hash_extensible.h)</span>
+<p>El hash extensible se implment&oacute; elaborando un tipo de dato abstracto llamdo <strong>THashExtensible</strong>. Internamente, este utiliza archivos de bloques para poder guardar la informaci&oacute;n.</p>
+<p>Primitivas Implementadas:</p>
+<ul>
+	<li><strong>HashExtensible_crear:</strong> Crea un hash extensible.</li>
+	<li><strong>HashExtensible_insertar:</strong> Obtiene un elemento del hash.</li>
+	<li><strong>HashExtensible_get:</strong> Escribe buffer(registro) en el archivo.</li>
+	<li><strong>HashExtensible_del:</strong> Elimina el elemento del hash.</li>
+	<li><strong>HashExtensible_destruir:</strong> Destruye el hash.</li>
+</ul>
+<span>Lista invertida (lista_invertida.h)</span>
+<p>Las listas invertidas se implment&oacute; elaborando un tipo de dato abstracto llamdo <strong>TListaInvertida</strong>. Internamente, este utiliza archivos de bloques para poder guardar la informaci&oacute;n.</p>
+<p>Primitivas Implementadas:</p>
+<ul>
+	<li><strong>ListaInvertida_new:</strong> Crea un elemento de la lista invertida.</li>
+	<li><strong>ListaInvertida_erase:</strong> Borra el elemento corriente.</li>
+	<li><strong>ListaInvertida_set:</strong> Setea el elemento corriente.</li>
+	<li><strong>ListaInvertida_get:</strong> Obtiene elemento de la lista.</li>
+	<li><strong>ListaInvertida_agregar:</strong> Agrega un elemento a la lista corriente.</li>
+	<li><strong>ListaInvertida_escribir:</strong> Escribe a disco.</li>
+	<li><strong>ListaInvertida_destruir:</strong> Crea una lista Invertida.</li>
+</ul>
+<span>&Aacute;rbol B+ (arbolbmas.h)</span>
+<p>El &aacute;rbol b+ se implment&oacute; elaborando un tipo de dato abstracto llamdo <strong>TArbolBM</strong>. Internamente, este utiliza archivos de bloques para poder guardar la informaci&oacute;n.</p>
+<p>Primitivas Implementadas:</p>
+<ul>
+	<li><strong>Arbol_crear:</strong> Crea el &aacute;rbol b+.</li>
+	<li><strong>Arbol_destruir:</strong> Destruye la instancia de &aacute;rbol.</li>
+	<li><strong>Arbol_insertar:</strong> Inserta elmento en &aacute;rbol.</li>
+	<li><strong>Arbol_get:</strong> Obtiene un elemento del &aacute;rbol.</li>
+	<li><strong>Arbol_remover:</strong> Remueve elemento.</li>
+</ul>
+<span>RTT (rtt.h)</span>
+<p>RTT se implment&oacute; elaborando un tipo de dato abstracto llamdo <strong>TRtt</strong>. Internamente, este utiliza &aacute;rboles b+ y listas invertidas..</p>
+<p>Primitivas Implementadas:</p>
+<ul>
+	<li><strong>Rtt_crear:</strong> Crea una instancia de Rtt.</li>
+	<li><strong>Rtt_agregar_texto:</strong> Agrega texto. Se debe usar el generar indice despu&eacute;s.</li>
+	<li><strong>Rtt_remover_termino:</strong> Remueve t&eacute;rmino.</li>
+	<li><strong>Rtt_generar_indice:</strong> Genera &iacute;ndice.</li>
+	<li><strong>Rtt_destruir:</strong> Destruye instancia de rtt.</li>
+</ul>
+
+<div class="nota">
+	<p>Todos los archivos cabecera (.h) de las entidades descriptas anteriormente, se encuentran comentados siguiendo las reglas Doxygen. Para tener mas informaci&oacute;n respecto a los par&acute;metros y funcionamiento de estas, por favor, leer los <i>.h</i>.</p>
+</div>
+</article>
+
+<article id="aplicacion">
+<span class="titulo">Capa Aplicaci&oacute;n</span>
+<span>Men&uacute; de operaciones</span>
+<p>Todas las funciones del men&uacute; de operaciones se definieron al principio del archivo <i>main.c</i>.</p>
+<p>Funciones definidas</p>
+<ul>
+	<li><strong>conectarse:</strong> Men&uacute; para conectarse</li>
+	<li><strong>crear_usuario:</strong> Men&uacute; para crear un usuario</li>
+	<li><strong>crear_categoria:</strong> Men&uacute; para crear una categoria</li>
+	<li><strong>menu_conectado_usuario:</strong> Men&uacute; que se muestra al usuario depu&eacute;s de conectarse</li>
+	<li><strong>menu_conectado_provedor:</strong> Men&uacute; que se muestra al proveedor depu&eacute;s de conectarse</li>
+	<li><strong>menu_conectado_admin:</strong> Men&uacute; que se muestra al adminitrador depu&eacute;s de conectarse</li>
+	<li><strong>modificar_datos:</strong> Men&uacute; usado para que un usuario modifque sus datos</li>
+	<li><strong>crear_servicio:</strong> Men&uacute; usado para que un proveedor cree un servicio</li>
+	<li><strong>borrar_servicio:</strong> Men&uacute; usado para que un proveedor borre un servicio</li>
+	<li><strong>buscar_servicio:</strong> Men&uacute; usado para que un usuario busque un servicio</li>
+	<li><strong>imprimir_servicio:</strong> Imprime por pantalla la informaci&oacute;n de un servicio</li>
+	<li><strong>imprimir_consulta:</strong> Imprime por pantalla la informaci&oacute;n de una consulta</li>
+	<li><strong>menu_pos_busqueda_de_servicio:</strong> Men&oacute; usado para que un usuario realice acciones sobre un servicio</li>
+	<li><strong>nueva_consulta:</strong> Men&oacute; usado para que un usuario haga una consulta acerca de un servicio</li>
+	<li><strong>nueva_cotizacion:</strong> Men&oacute; usado para que un usuario haga un pedido de cotizaci&oacute;n acerca de un servicio</li>
+	<li><strong>list_categorias:</strong> Lista las categorias por pantalla</li>
+	<li><strong>list_usuarios:</strong> Lista los usuarios de un determinado tipo por pantalla</li>
+</ul>
+<span>Categor&iacute;as</span>
+<p>Se implement&oacute; un <i>TDA</i> para el uso de las consultas. Se pens&oacute; el modelo estilo <i>Singletone</i>, como se utiliz&oacute; en TDAs en vez de en clases, se guardaron punteros staticos.</p>
+<p>Primitivas Implementadas:</p>
+<ul>
+	<li><strong>Consulta_init:</strong> Inicializa uso de consultas</li>
+	<li><strong>Consulta_end:</strong> Finaliza uso de consultas</li>
+	<li><strong>Consulta_new:</strong> Crea una nueva consultas</li>
+	<li><strong>Consulta_from_id:</strong> Trae una consultas buscandola desde la id.</li>
+	<li><strong>Consulta_del:</strong>  Borra consulta.</li>
+	<li><strong>Consulta_buscar:</strong> Busca utilizando RTT la constula.</li>
+	<li><strong>Consulta_from_dni:</strong> Busca la consulta por dni del creador.</li>
+	<li><strong>Consulta_from_serv:</strong> Busca la consulta por id de servicio.</li>
+	<li><strong>Setters y getters para los datos de la consulta</strong></li>
+	<li><strong>Consulta_store:</strong> Guarda consulta. Solo se debe llamar para guardar consulta despues de modificarla.</li>
+	<li><strong>Consulta_free:</strong> Libera memroia para la entidad categoria</li>
+</ul>
+<span>Cotizaciones</span>
+<p>Se implement&oacute; un <i>TDA</i> para el uso de las cotizaciones. Se pens&oacute; el modelo estilo <i>Singletone</i>, como se utiliz&oacute; en TDAs en vez de en clases, se guardaron punteros staticos.</p>
+<p>Primitivas Implementadas:</p>
+<ul>
+	<li><strong>Cotizaciones_init:</strong> Inicializa uso de consultas</li>
+	<li><strong>Cotizaciones_end:</strong> Finaliza uso de consultas</li>
+	<li><strong>Cotizacion_new:</strong> Crea una nueva cotizaci&oacute;n</li>
+	<li><strong>Cotizacion_from_id:</strong> Trae una cotizaci&oacute;n buscandola desde la id.</li>
+	<li><strong>Cotizacion_del:</strong>  Borra cotizaci&oacute;n.</li>
+	<li><strong>Getters para los datos de la cotizaci&oacute;n</strong></li>
+	<li><strong>Cotizacion_free:</strong> Libera memroia para la entidad cotizaci&oacute;n</li>
+</ul>
+<span>Cotizaciones</span>
+<p>Se implement&oacute; un <i>TDA</i> para el uso de las cotizaciones. Se pens&oacute; el modelo estilo <i>Singletone</i>, como se utiliz&oacute; en TDAs en vez de en clases, se guardaron punteros staticos.</p>
+<p>Primitivas Implementadas:</p>
+<ul>
+	<li><strong>Cotizaciones_init:</strong> Inicializa uso de consultas</li>
+	<li><strong>Cotizaciones_end:</strong> Finaliza uso de consultas</li>
+	<li><strong>Cotizacion_new:</strong> Crea una nueva cotizaci&oacute;n</li>
+	<li><strong>Cotizacion_from_id:</strong> Trae una cotizaci&oacute;n buscandola desde la id.</li>
+	<li><strong>Cotizacion_del:</strong>  Borra cotizaci&oacute;n.</li>
+	<li><strong>Getters para los datos de la cotizaci&oacute;n</strong></li>
+	<li><strong>Cotizacion_free:</strong> Libera memroia para la entidad cotizaci&oacute;n</li>
+</ul>
+
+<div class="nota">
+	<p>Todos los archivos cabecera (.h) de las entidades descriptas anteriormente, se encuentran comentados siguiendo las reglas Doxygen. Para tener mas informaci&oacute;n respecto a los par&acute;metros y funcionamiento de estas, por favor, leer los <i>.h</i>.</p>
+</div>
+</article>
+<!-- fin de contenido -->
+
+</div><!-- cierre contenedor_general -->
+
+</body>
+</html>

@@ -8,22 +8,39 @@
 #include "categorias.h"
 #include <time.h>
 
+/** Menu para conectarse al sistema  */
 void conectarse();
+/** Menu para crear un usuario */
 void crear_usuario(char t_u);
+/** Menu para crear una categoria */
 void crear_categoria();
+/** Menu que se muestra al usuario depues de conectarse */
 void menu_conectado_usuario(TUsuario* user);
+/** Menu que se muestra al proveedor depues de conectarse */
 void menu_conectado_provedor(TUsuario* user);
+/** Menu que se muestra al adminitrador depues de conectarse */
 void menu_conectado_admin(TUsuario* user);
+/** Menu usado para que un usuario modifque sus datos */
 int modificar_datos(TUsuario* user);
+/** Menu usado para que un proveedor cree un servicio */
 void crear_servicio(TUsuario* user);
+/** Menu usado para que un proveedor borre un servicio */
 void borrar_servicio(TUsuario* user);
+/** Menu usado para que un usuario busque un servicio*/
 void buscar_servicio(TUsuario* user);
+/** Imprime por pantalla la informacion de un servicio*/
 void imprimir_servicio(TServicio* serv);
+/** Imprime por pantalla la informacion de una consulta*/
 void imprimir_consulta(TConsulta* con);
+/** Menu usado para que un usuario realice acciones sobre un servicio*/
 void menu_pos_busqueda_de_servicio(TUsuario* user, unsigned int idserv);
+/** Menu usado para que un usuario haga una consulta acerca de un servicio*/
 void nueva_consulta(TUsuario* user, TServicio* serv);
+/** Menu usado para que un usuario haga un pedido de cotizacion acerca de un servicio*/
 void nueva_cotizacion(TUsuario* user, TServicio* serv);
+/** Lista las categorias por pantalla */
 void list_categorias();
+/** Lista los usuarios de un determinado tipo por pantalla */
 void list_usuarios(char t_u);
 void get_time(char* fecha, char*hora);
 

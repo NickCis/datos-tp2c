@@ -33,9 +33,14 @@ int ArchivoReg_escribir(TArchivoReg* this, uint8_t* buff, size_t size);
  */
 int ArchivoReg_destruir(TArchivoReg* this);
 
-/** Seekea el final del archivo.
+/** Seekea al final del archivo.
+ * @param TArchivoReg* this: instancia de archivo de registro
  */
 int ArchivoReg_seek_end(TArchivoReg* this);
+
+/** Seekea al principio  del archivo.
+ * @param TArchivoReg* this: instancia de archivo de registro
+ */
 int ArchivoReg_seek_start(TArchivoReg* this);
 
 #endif
