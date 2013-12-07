@@ -66,7 +66,7 @@ int main (int argc, char const* argv[])
   char *masterKey = "E_1FG5;-?";
   char *my_word   ="GOL";
 
-  printf("Clave maestra: %s", masterKey);
+  printf("Clave maestra: %s\n", masterKey);
 
   bool is_present = 0;//falso
   int pos = 0;
@@ -87,7 +87,7 @@ int main (int argc, char const* argv[])
     while(!is_present && pos < 41){
       if(symbols[pos] == masterKey[i]){
         matrix[i] = pos;
-	printf("\n %i",matrix[i]);
+	//printf("\n %i",matrix[i]);
         is_present = 1;
       }
       pos += 1;
@@ -131,11 +131,11 @@ int main (int argc, char const* argv[])
     for (i = 1; i < 10; i++) {
       printf( " | %i " , matrix[i-1]);
       if(i%3==0)
-        printf( " | ");
+        printf( "\n");
     }
-    printf("\n El determinante modulo 41 es = ",inv_det);
+    printf("\n El determinante modulo 41 es = %i \n",inv_det);
 
-    printf( "\n Inversa: ");
+    printf( "\n Inversa:\n ");
     for (i = 0; i < 9; i++) {
       if(i%2 == 0)
         inv[i] = ( adj[i] * inv_det ) % 41;
@@ -146,12 +146,12 @@ int main (int argc, char const* argv[])
     }
 
     for (i = 1; i < 10; i++) {
-      printf(" | ",inv[i-1]);
+      printf(" |%i ",inv[i-1]);
       if(i%3==0)
-        printf( " | " );
+        printf( " \n" );
     }
     
-  printf( "\n Identidad: ");
+  printf( "\n Identidad: \n");
     idn[0] = (matrix[0]*inv[0]+matrix[1]*inv[3]+matrix[2]*inv[6])%41;
     idn[1] = (matrix[0]*inv[1]+matrix[1]*inv[4]+matrix[2]*inv[7])%41;
     idn[2] = (matrix[0]*inv[2]+matrix[1]*inv[5]+matrix[2]*inv[8])%41;
@@ -166,13 +166,13 @@ int main (int argc, char const* argv[])
 
     for (i = 1; i < 10; i++) {
 
-      printf( " | " , (idn[i-1] + 41)%41);
+      printf( " | %i" , (idn[i-1] + 41)%41);
       if(i%3==0)
-       printf( " | ");
+       printf( " \n ");
     }
 
 
-printf( "Como tenemos inversa, vamos a codificar un texto...");
+printf( "Como tenemos inversa, codificamos un texto...");
 
     for (i = 0; i < 3; i++) {
       is_present = 0;
@@ -185,23 +185,22 @@ printf( "Como tenemos inversa, vamos a codificar un texto...");
         pos += 1;
       }
     }
-    printf( "Vamos a codificar: " ,my_word);
+    printf( "\n Se codificará: %s " ,my_word);
 printf(" ( ",word_code[0]);
 printf(",", word_code[1]);
 printf(",", word_code[2],")");
 
 
 encrypt(matrix, word_code, result1);
-printf( "Resultado de la codificacion (" ,result1[0]);
+printf( " \n Resultado de la codificacion (" ,result1[0]);
 printf(",",result1[1]);
 printf(",",result1[2],")");
 printf(" \n Palabra: ");
     for (i = 0; i < 3; i++) {
       printf("%c",symbols[result1[i]]);
-	//string_encoded += symbols[result1[i]];
-    }
-    //printf("%c",string_encoded);
 
+    }
+   
     decrypt(inv, result1, result2);
     printf("\n Resultado de la decodificacion (",result2[0]);
 printf( ",",result2[1]);
