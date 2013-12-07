@@ -62,11 +62,11 @@ int euclides(int q, int x1, int x2, int b, int y1, int y2,int a){
 
 int main (int argc, char const* argv[])
 {
-  char *symbols = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.?,-";
-  char *masterKey = "E_1FG5;-?";
-  char *my_word   ="GOL";
+  char *simbolos = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.?,-";
+  char *clave = "E_1FG5;-?";
+  char *palabra   ="GOL";
 
-  printf("Clave maestra: %s\n", masterKey);
+  printf("Clave maestra: %s\n", clave);
 
   bool is_present = 0;//falso
   int pos = 0;
@@ -85,7 +85,7 @@ int main (int argc, char const* argv[])
     is_present = 0;
     pos  = 0;
     while(!is_present && pos < 41){
-      if(symbols[pos] == masterKey[i]){
+      if(simbolos[pos] == clave[i]){
         matrix[i] = pos;
 	//printf("\n %i",matrix[i]);
         is_present = 1;
@@ -178,41 +178,44 @@ printf( "Como tenemos inversa, codificamos un texto...");
       is_present = 0;
       pos  = 0;
       while(!is_present && pos < 41){
-        if(symbols[pos] == my_word[i]){
+        if(simbolos[pos] == palabra[i]){
           word_code[i] = pos;
           is_present = 1;
         }
         pos += 1;
       }
     }
-    printf( "\n Se codificará: %s " ,my_word);
-printf(" ( ",word_code[0]);
-printf(",", word_code[1]);
-printf(",", word_code[2],")");
+    printf( "\n Se codificará: %s ",palabra);
+printf("( %i",word_code[0]);
+printf(",%i", word_code[1]);
+printf(",%i", word_code[2]);
+printf(")");
 
 
 encrypt(matrix, word_code, result1);
-printf( " \n Resultado de la codificacion (" ,result1[0]);
-printf(",",result1[1]);
-printf(",",result1[2],")");
+printf( " \n Resultado de la codificacion (%i" ,result1[0]);
+printf(",%i",result1[1]);
+printf(",%i",result1[2]);
+printf(")\n");
 printf(" \n Palabra: ");
     for (i = 0; i < 3; i++) {
-      printf("%c",symbols[result1[i]]);
-
+      printf("%c",simbolos[result1[i]]);
+	
     }
-   
+ 
     decrypt(inv, result1, result2);
-    printf("\n Resultado de la decodificacion (",result2[0]);
-printf( ",",result2[1]);
-printf( ",",result2[2]);
+    printf("\n Resultado de la decodificacion (%i",result2[0]);
+printf( ",%i",result2[1]);
+printf( ",%i",result2[2]);
 printf( ")");
-printf( "\nPalabra: ");
+printf( "\nPalabra:\n ");
 
     for (i = 0; i < 3; i++) {
 
-     printf("%c", symbols[result2[i]]);
+     printf("%c", simbolos[result2[i]]);
     }
-//printf("%s",string_decoded);
+printf("\n");
+
   }
 
 
