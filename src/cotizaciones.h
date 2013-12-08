@@ -32,6 +32,20 @@ TCotizacion* Cotizacion_new(
  */
 TCotizacion* Cotizacion_from_id(unsigned int id);
 
+/** Obtiene cotizaciones desde id servicio
+ * @param id_serv id servicio
+ * @param len[out] largo de la lista
+ * @return array de ids de usuario
+ */
+unsigned int* Cotizacion_from_id_serv(unsigned int id_serv, size_t *len);
+
+/** Obtiene cotizaciones desde id usuario
+ * @param id_usu id del usuario
+ * @param len[out] largo de la lista
+ * @return array de ids de usuario
+ */
+unsigned int* Cotizacion_from_id_usu(unsigned int id_usu, size_t *len);
+
 /** Metodos para obtener informacion de la cotizacion.
  */
 unsigned int Cotizacion_get_id(TCotizacion* this);

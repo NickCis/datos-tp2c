@@ -73,6 +73,17 @@
 #define CONSULTAS_INDICE_USU_PATH "./con_arbm_usu.dat"
 #define CONSULTAS_ARBM_USU_ORDEN (64)
 
+#define COTIZACIONES_INDICE_SERV_PATH "./cot_arbm_serv.dat"
+#define COTIZACIONES_ARBM_SERV_ORDEN (64)
+#define COTIZACIONES_LISTA_SERV "./cot_lista_serv.dat"
+#define COTIZACIONES_LISTA_SERV_BAJA "./cot_lista_serv_baja.dat"
+#define COTIZACIONES_LISTA_SERV_BLOCK (512)
+#define COTIZACIONES_INDICE_DNI_PATH "./cot_arbm_dni.dat"
+#define COTIZACIONES_ARBM_DNI_ORDEN (64)
+#define COTIZACIONES_LISTA_DNI "./cot_lista_dni.dat"
+#define COTIZACIONES_LISTA_DNI_BAJA "./cot_lista_dni_baja.dat"
+#define COTIZACIONES_LISTA_DNI_BLOCK (512)
+
 #define SYSTEM_PASS "ABCDEABCD"
 
 #endif

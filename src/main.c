@@ -31,6 +31,8 @@ void borrar_servicio(TUsuario* user);
 void buscar_servicio(TUsuario* user);
 /** Imprime por pantalla la informacion de un servicio*/
 void imprimir_servicio(TServicio* serv);
+/** Imprime por pantalla los pedidos de cotizacion*/
+void imprimir_cotizaciones(TServicio* serv);
 /** Imprime por pantalla la informacion de una consulta*/
 void imprimir_consulta(TConsulta* con);
 /** Menu usado para que un usuario realice acciones sobre un servicio*/
@@ -538,7 +540,28 @@ void nueva_consulta(TUsuario* user, TServicio* serv){
 }
 
 void nueva_cotizacion(TUsuario* user, TServicio* serv){
-	printf("TODO:\n");
+	char pedido[1001];
+	char fecha[9];
+	char hora[5];
+	printf("Ingrese Pedido de cotizacion:\n");
+	read_str(pedido, 1000);
+
+	get_time(fecha, hora);
+
+	TCotizacion* cot = Cotizacion_new(
+		Servicio_get_id(serv),
+		Usuario_get_dni(user),
+		pedido,
+		fecha,
+		hora
+	);
+
+	if(!cot){
+		printf("Error creando la cotizacion\n");
+		return;
+	}
+	Cotizacion_free(cot);
+	printf("Cotizacion creada satisfactoriamente\n");
 }
 
 void imprimir_servicio(TServicio* serv){
@@ -561,6 +584,31 @@ void imprimir_servicio(TServicio* serv){
 			TConsulta* con = Consulta_from_id(cons[i]);
 			imprimir_consulta(con);
 			Consulta_free(con);
+		}
+		free(cons);
+		printf(" ---------- \n");
+	}
+}
+
+void imprimir_cotizaciones(TServicio* serv){
+	if(! serv){
+		//printf("Servicio inexistente\n");
+		return;
+	}
+	size_t len;
+	unsigned int* cons = Cotizacion_from_id_serv(Servicio_get_id(serv), &len);
+	size_t i;
+	if(cons){
+		printf(" --- Pedidos de cotizacion --- \n");
+		for(i=0; i < len; i++){
+			TCotizacion* con = Cotizacion_from_id(cons[i]);
+			printf("Cotizacion #%d\n", Cotizacion_get_id(con));
+			printf("\tServicio #%d\n", Cotizacion_get_id_serv(con));
+			printf("\tDni #%d\n", Cotizacion_get_dni(con));
+			printf("\tPedido: '%s'\n", Cotizacion_get_pedido(con));
+			printf("\tFecha: %s\n", Cotizacion_get_fecha(con));
+			printf("\tHora: %s\n", Cotizacion_get_hora(con));
+			Cotizacion_free(con);
 		}
 		free(cons);
 		printf(" ---------- \n");
@@ -604,6 +652,7 @@ void menu_conectado_provedor(TUsuario* user){
 				TServicio* serv;
 				while( (serv = Servicio_from_dni_prov(Usuario_get_dni(user), &id_p)) ){
 					imprimir_servicio(serv);
+					imprimir_cotizaciones(serv);
 					Servicio_free(serv);
 				}
 				contestar_consulta(0);
