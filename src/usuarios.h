@@ -13,6 +13,15 @@ int Usuarios_end();
 
 
 /** Crea un nuevo usuario, lo agrega al hash.
+ * @param dni
+ * @param nombre
+ * @param apellido
+ * @param c_mail cantidad de mails a agregar (puede ser 0)
+ * @param mails array de char* de mails a agregar
+ * @param pass contrase~na
+ * @param prov provincia
+ * @param t_u tipo de usuario ( 'u' -> usuario normal, 'p' -> proveedor, 'a' -> admin, 's' -> superadmin)
+ * @return tda de usuario
  */
 TUsuario* Usuario_new(
 	unsigned int dni,
@@ -26,10 +35,15 @@ TUsuario* Usuario_new(
 );
 
 /** Obtiene un usuario desde su dni
+ * @param dni
+ * @return tda de usuario
  */
 TUsuario* Usuario_from_dni(unsigned int dni);
 
 /** Obtiene usuarios desde tipo de usuario
+ * @param t_u tipo de usuario
+ * @param len[out] largo de la lista
+ * @return array de ids de usuario
  */
 unsigned int* Usuario_from_t_u(char t_u, size_t *len);
 
@@ -56,7 +70,8 @@ int Usuario_set_provincia(TUsuario* this, char* prov);
 char Usuario_get_tipo(TUsuario* this);
 int Usuario_set_tipo(TUsuario* this, char t_u);
 
-/** Graba cambios que se le hicieron al usuario
+/** Graba cambios que se le hicieron al usuario.
+ * Solo es necesario hacerlo si se hicieorn cambios de un usuario obtenido por Usuario_from_dni.
  * @return 0-> ok, resto error
  */
 int Usuario_store(TUsuario* this);

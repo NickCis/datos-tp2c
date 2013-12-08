@@ -26,6 +26,8 @@
 	<li><a href="#Integrantes" class="indice_entrada">Integrantes</a></li>
 	<li><a href="#Descripción_general" class="indice_entrada">Descripción general</a></li>
 	<li><a href="#Funcionalidad" class="indice_entrada">Funcionalidad</a></li>
+	<li><a href="#instalacion" class="indice_entrada">Instalaci&oacute;n</a></li>
+	<li><a href="#configuracion" class="indice_entrada">Configuraci&oacute;n</a></li>
 	<li><a href="#fisica" class="indice_entrada">Capa F&iacute;sica</a></li>
 	<li><a href="#logica" class="indice_entrada">Capa L&oacute;gica</a></li>
 	<li><a href="#aplicacion" class="indice_entrada">Capa Aplicaci&oacute;n</a></li>
@@ -42,6 +44,8 @@
 		<li><a href="#Integrantes" class="indice_entrada">Integrantes</a></li>
 		<li><a href="#Descripcion_general" class="indice_entrada">Descripci&oacute;n general</a></li>
 		<li><a href="#Funcionalidad" class="indice_entrada">Funcionalidad</a></li>
+		<li><a href="#instalacion" class="indice_entrada">Instalaci&oacute;n</a></li>
+		<li><a href="#configuracion" class="indice_entrada">Configuraci&oacute;n</a></li>
 		<li><a href="#fisica" class="indice_entrada">Capa F&iacute;sica</a></li>
 		<li><a href="#logica" class="indice_entrada">Capa L&oacute;gica</a></li>
 		<li><a href="#aplicacion" class="indice_entrada">Capa Aplicaci&oacute;n</a></li>
@@ -82,10 +86,9 @@
 	<li><strong>Capa Aplicaci&oacute;n:</strong> m&oacute;dulos que permiten la interacci&oacute;n entre usuarios del sistema y &eacute;ste.</li>
 </ul>
 
+<p>Se utilizo git como sistema de control de verciones: <a href="https://github.com/NickCis/datos-tp2c">https://github.com/NickCis/datos-tp2c</a>.</p>
+
 </article>
-
-
-
 <article id="Funcionalidad">
 <span class="titulo">Funcionalidad </span>
 <span>Implementada</span>
@@ -96,10 +99,149 @@
 <ul>
 	<li>Aministraci&oacute;n de Espacio Libre con listas encadenadas</li>
 	<li>En las partes de RTT cuando se dan de baja elementos, no se borran las referencias en el RTT</li>
+	<li>Alta masiva de categor&iacute;as</li>
 </ul>
 </article>
 
+<article id="instalacion">
+<span class="titulo">Instalaci&oacute;n </span>
+<p> Para compilar, se utiliz&oacute; la herramienta <i>make</i>.
+<pre>
+<code>
+ $ make 
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o autoincrement.o autoincrement.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o lista_invertida.o lista_invertida.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o bloque.o bloque.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o archivo_bloque.o archivo_bloque.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o heapsort.o heapsort.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o serializador.o serializador.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o ordenador.o ordenador.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o consultas.o consultas.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o stdin_io.o stdin_io.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o usuarios.o usuarios.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o categorias.o categorias.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o rtt.o rtt.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o arbolbmas.o arbolbmas.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o archivo_registro.o archivo_registro.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o libres_bloques.o libres_bloques.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o cotizaciones.o cotizaciones.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o sort_externo.o sort_externo.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o hash_extensible.o hash_extensible.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o servicios.o servicios.c
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o main.o main.c
+ gcc  -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0 main.o autoincrement.o usuarios.o arbolbmas.o archivo_registro.o libres_bloques.o cotizaciones.o lista_invertida.o bloque.o serializador.o consultas.o stdin_io.o archivo_bloque.o categorias.o heapsort.o rtt.o sort_externo.o hash_extensible.o servicios.o ordenador.o -o main
+ gcc -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0   -c -o main_creador_admin.o main_creador_admin.c
+ gcc  -std=c99 -Wall -Werror -pedantic -pedantic-errors -O3 -DNDEBUG -ggdb -DDEBUG -fno-inline -O0 main_creador_admin.o autoincrement.o usuarios.o arbolbmas.o archivo_registro.o libres_bloques.o cotizaciones.o lista_invertida.o bloque.o serializador.o consultas.o stdin_io.o archivo_bloque.o categorias.o heapsort.o rtt.o sort_externo.o hash_extensible.o servicios.o ordenador.o -o creador_admin
+</code>
+</pre>
+<p>Esto generar&aacute; dos binarios <i>main</i> y <i>creador_admin</i></p>
+<p>El <i>creador_admin</i> se utiliza para dar de alta al administrador principal</p>
+<pre>
+<code>
+$ ./creador_admin
+Crear administrador del sistema
+Ingrese dni:
+1
+Ingrese nombre:
+Aministrador
+Ingrese apellido:
+Principal
+Ingrese cantidad de mails:
+1
+Ingrese mail n 1:
+admin@principal.com
+Ingrese contrase~na:
+1
+Ingrese provincia:
+Buenos Aires
+Se creara usuario:
+        * Dni: '1'
+        * Nombre: 'Aministrador'
+        * Apellido: 'Principal'
+        * Cantidad de mails: '1'
+        * Mail 1: 'admin@principal.com'
+        * Contrase~na: '1'
+        * Provincia: 'Buenos Aires'
+Esta seguro?(s/n)
+s
+Usuario creado Satisfactoriamente
+</code>
+</pre>
+<p>El ejecutable <i>main</i> es basicamente el programa en s&iacute; mismo. Este se explica en el manual de usuario.</p>
+</article>
+<article id="configuracion">
+<span class="titulo">Configuraci&oacute;n </span>
+<p>El programa solo permite configuraci&oacute;n en tiempo de compilaci&oacute;n. Se eligio esto debido a la facilidad de implementarla, adem&aacute;s, de que no tiene mucho sentido cambiar los par&aacute;metros configurables despu&eacute;s de haber empezado a usar la aplicaci&oacute;n. Cambios como las rutas de los archivos o tama&ntilde;o de los bloques generar&iacute;n conflictos con los archivos ya existentes, pudiendo provocar fallos de segmentaci&oacute;.</p>
+<p>Los par&aacute;metros configurables son los siguientes:</p>
+<ul>
+	<li>USUARIOS_HASH_BLOQUE_PATH</li>
+	<li>USUARIOS_HASH_TABLA_PATH</li>
+	<li>USUARIOS_HASH_BAJA_PATH</li>
+	<li>USUARIOS_HASH_BLOQUE_SIZE</li>
+	<li>USUARIOS_INDICE_T_U_PATH</li>
+	<li>USUARIOS_ARBM_TU_ORDEN</li>
+	<li>USUARIOS_LISTA_T_U</li>
+	<li>USUARIOS_LISTA_T_U_BAJA</li>
+	<li>USUARIOS_LISTA_BLOCK</li>
+	<li>SERVICIOS_HASH_BLOQUE_PATH</li>
+	<li>SERVICIOS_HASH_TABLA_PATH</li>
+	<li>SERVICIOS_HASH_BAJA_PATH</li>
+	<li>SERVICIOS_HASH_BLOQUE_SIZE</li>
+	<li>SERVICIOS_LAST_ID_FILE</li>
+	<li>SERVICIOS_INDICE_CAT_PATH</li>
+	<li>SERVICIOS_ARBM_CAT_ORDEN</li>
+	<li>SERVICIOS_LISTA_CAT</li>
+	<li>SERVICIOS_LISTA_CAT_BAJA</li>
+	<li>SERVICIOS_LISTA_BLOCK</li>
+	<li>SERVICIOS_RTT_OCU_APA</li>
+	<li>SERVICIOS_RTT_OCU_DOC</li>
+	<li>SERVICIOS_RTT_ARB</li>
+	<li>SERVICIOS_RTT_LISTA</li>
+	<li>SERVICIOS_RTT_LISTA_BAJA</li>
+	<li>SERVICIOS_RTT_ARB_ORDEN</li>
+	<li>SERVICIOS_RTT_BLOCK</li>
+	<li>CATEGORIAS_HASH_BLOQUE_PATH</li>
+	<li>CATEGORIAS_HASH_TABLA_PATH</li>
+	<li>CATEGORIAS_HASH_BAJA_PATH</li>
+	<li>CATEGORIAS_HASH_BLOQUE_SIZE</li>
+	<li>CATEGORIAS_LAST_ID_FILE</li>
+	<li>CATEGORIAS_RTT_OCU_APA</li>
+	<li>CATEGORIAS_RTT_OCU_DOC</li>
+	<li>CATEGORIAS_RTT_ARB</li>
+	<li>CATEGORIAS_RTT_LISTA</li>
+	<li>CATEGORIAS_RTT_LISTA_BAJA</li>
+	<li>CATEGORIAS_RTT_ARB_ORDEN</li>
+	<li>CATEGORIAS_RTT_BLOCK</li>
+	<li>COTIZACIONES_HASH_BLOQUE_PATH</li>
+	<li>COTIZACIONES_HASH_TABLA_PATH</li>
+	<li>COTIZACIONES_HASH_BAJA_PATH</li>
+	<li>COTIZACIONES_HASH_BLOQUE_SIZE</li>
+	<li>COTIZACIONES_LAST_ID_FILE</li>
+	<li>CONSULTAS_HASH_BLOQUE_PATH</li>
+	<li>CONSULTAS_HASH_TABLA_PATH</li>
+	<li>CONSULTAS_HASH_BAJA_PATH</li>
+	<li>CONSULTAS_HASH_BLOQUE_SIZE</li>
+	<li>CONSULTAS_LAST_ID_FILE</li>
+	<li>CONSULTAS_RTT_OCU_APA</li>
+	<li>CONSULTAS_RTT_OCU_DOC</li>
+	<li>CONSULTAS_RTT_ARB</li>
+	<li>CONSULTAS_RTT_LISTA</li>
+	<li>CONSULTAS_RTT_LISTA_BAJA</li>
+	<li>CONSULTAS_RTT_ARB_ORDEN</li>
+	<li>CONSULTAS_RTT_BLOCK</li>
+	<li>CONSULTAS_LISTA_SERV</li>
+	<li>CONSULTAS_LISTA_SERV_BAJA</li>
+	<li>CONSULTAS_LISTA_SERV_BLOCK</li>
+	<li>CONSULTAS_INDICE_SERV_PATH</li>
+	<li>CONSULTAS_ARBM_SERV_ORDEN</li>
+	<li>CONSULTAS_LISTA_USU</li>
+	<li>CONSULTAS_LISTA_USU_BAJA</li>
+	<li>CONSULTAS_LISTA_USU_BLOCK</li>
+	<li>CONSULTAS_INDICE_USU_PATH</li>
+	<li>CONSULTAS_ARBM_USU_ORDEN</li>
+</ul>
 
+</article>
 <article id="fisica">
 <span class="titulo">Capa F&iacute;sica</span>
 <span>Serializador (serializador.h)</span>
@@ -243,7 +385,7 @@
 	<li><strong>list_categorias:</strong> Lista las categorias por pantalla</li>
 	<li><strong>list_usuarios:</strong> Lista los usuarios de un determinado tipo por pantalla</li>
 </ul>
-<span>Categor&iacute;as</span>
+<span>Categor&iacute;as (categorias.h)</span>
 <p>Se implement&oacute; un <i>TDA</i> para el uso de las consultas. Se pens&oacute; el modelo estilo <i>Singletone</i>, como se utiliz&oacute; en TDAs en vez de en clases, se guardaron punteros staticos.</p>
 <p>Primitivas Implementadas:</p>
 <ul>
@@ -259,7 +401,7 @@
 	<li><strong>Consulta_store:</strong> Guarda consulta. Solo se debe llamar para guardar consulta despues de modificarla.</li>
 	<li><strong>Consulta_free:</strong> Libera memroia para la entidad categoria</li>
 </ul>
-<span>Cotizaciones</span>
+<span>Cotizaciones (cotizaciones.h)</span>
 <p>Se implement&oacute; un <i>TDA</i> para el uso de las cotizaciones. Se pens&oacute; el modelo estilo <i>Singletone</i>, como se utiliz&oacute; en TDAs en vez de en clases, se guardaron punteros staticos.</p>
 <p>Primitivas Implementadas:</p>
 <ul>
@@ -271,17 +413,35 @@
 	<li><strong>Getters para los datos de la cotizaci&oacute;n</strong></li>
 	<li><strong>Cotizacion_free:</strong> Libera memroia para la entidad cotizaci&oacute;n</li>
 </ul>
-<span>Cotizaciones</span>
-<p>Se implement&oacute; un <i>TDA</i> para el uso de las cotizaciones. Se pens&oacute; el modelo estilo <i>Singletone</i>, como se utiliz&oacute; en TDAs en vez de en clases, se guardaron punteros staticos.</p>
+<span>Servicios (servicios.h)</span>
+<p>Se implement&oacute; un <i>TDA</i> para el uso de las servicios. Se pens&oacute; el modelo estilo <i>Singletone</i>, como se utiliz&oacute; en TDAs en vez de en clases, se guardaron punteros staticos.</p>
 <p>Primitivas Implementadas:</p>
 <ul>
-	<li><strong>Cotizaciones_init:</strong> Inicializa uso de consultas</li>
-	<li><strong>Cotizaciones_end:</strong> Finaliza uso de consultas</li>
-	<li><strong>Cotizacion_new:</strong> Crea una nueva cotizaci&oacute;n</li>
-	<li><strong>Cotizacion_from_id:</strong> Trae una cotizaci&oacute;n buscandola desde la id.</li>
-	<li><strong>Cotizacion_del:</strong>  Borra cotizaci&oacute;n.</li>
-	<li><strong>Getters para los datos de la cotizaci&oacute;n</strong></li>
-	<li><strong>Cotizacion_free:</strong> Libera memroia para la entidad cotizaci&oacute;n</li>
+	<li><strong>Servicios_init:</strong> Inicializa uso de servicios</li>
+	<li><strong>Servicios_end:</strong> Finaliza uso de servicios</li>
+	<li><strong>Servicio_new:</strong> Crea un nuevo servicio</li>
+	<li><strong>Servicio_from_id:</strong> Trae un servicio buscandola desde la id.</li>
+	<li><strong>Servicio_from_dni_prov:</strong> Itera trayendo todos los servicios de un proveedor.</li>
+	<li><strong>Servicio_from_categoria:</strong> Devuelve una lista de ids de servicios de la categoria.</li>
+	<li><strong>Servicio_agregar_categoria:</strong> Agrega una categoria al servicio.</li>
+	<li><strong>Servicio_buscar:</strong> Busca utilizando RTT el servicio sobre el campo descripci&oacute;n.</li>
+	<li><strong>Servicio_del:</strong>  Borra servicio.</li>
+	<li><strong>Getters para los datos del servicio </strong></li>
+	<li><strong>Servicio_free:</strong> Libera memoria para la entidad servicio</li>
+</ul>
+<span>Usuarios (usuarios.h)</span>
+<p>Se implement&oacute; un <i>TDA</i> para el uso de los usuarios. Se pens&oacute; el modelo estilo <i>Singletone</i>, como se utiliz&oacute; en TDAs en vez de en clases, se guardaron punteros staticos.</p>
+<p>Primitivas Implementadas:</p>
+<ul>
+	<li><strong>Usuarios_init:</strong> Inicializa uso de servicios</li>
+	<li><strong>Usuarios_end:</strong> Finaliza uso de servicios</li>
+	<li><strong>Usuario_new:</strong> Crea un nuevo usuario</li>
+	<li><strong>Usuario_from_dni:</strong> Trae un usuario buscandola desde el dni.</li>
+	<li><strong>Usuario_from_t_u:</strong> Obtiene usuarios desde tipo de usuario.</li>
+	<li><strong>Usuario_del:</strong>  Borra usuario.</li>
+	<li><strong>Getters/setters para los datos del usuario </strong></li>
+	<li><strong>Usuario_store:</strong> Graba cambios que se le hicieron al usuario.</li>
+	<li><strong>Usuario_free:</strong> Libera memoria para la entidad usuario.</li>
 </ul>
 
 <div class="nota">
