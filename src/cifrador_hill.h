@@ -1,7 +1,7 @@
 #ifndef __CIFRADOR_HILL_
 #define __CIFRADOR_HILL_
 
-/** Comprueba si un texto esta en el abecedario.
+/** Normaliza el texto.
  * @param text, texto
  * @param out[out] texto normalizado (se debe pasar un puntero malloqueado)
  */

@@ -31,7 +31,7 @@
 	<li><a href="#fisica" class="indice_entrada">Capa F&iacute;sica</a></li>
 	<li><a href="#logica" class="indice_entrada">Capa L&oacute;gica</a></li>
 	<li><a href="#aplicacion" class="indice_entrada">Capa Aplicaci&oacute;n</a></li>
-	<li><a href="#Código_fuente" class="indice_entrada">Código fuente</a></li>
+	<li><a href="#hill" class="indice_entrada">Encriptaci&oacute;n</a></li>
 </ol>
 </article>
 
@@ -49,7 +49,7 @@
 		<li><a href="#fisica" class="indice_entrada">Capa F&iacute;sica</a></li>
 		<li><a href="#logica" class="indice_entrada">Capa L&oacute;gica</a></li>
 		<li><a href="#aplicacion" class="indice_entrada">Capa Aplicaci&oacute;n</a></li>
-		<li><a href="#Código_fuente" class="indice_entrada">Código fuente</a></li>
+		<li><a href="#hill" class="indice_entrada">Encriptaci&oacute;n</a></li>
 	</ol>
 </div>
 </article>
@@ -239,7 +239,19 @@ Usuario creado Satisfactoriamente
 	<li>CONSULTAS_LISTA_USU_BLOCK</li>
 	<li>CONSULTAS_INDICE_USU_PATH</li>
 	<li>CONSULTAS_ARBM_USU_ORDEN</li>
+	<li>COTIZACIONES_INDICE_SERV_PATH</li>
+	<li>COTIZACIONES_ARBM_SERV_ORDEN</li>
+	<li>COTIZACIONES_LISTA_SERV</li>
+	<li>COTIZACIONES_LISTA_SERV_BAJA</li>
+	<li>COTIZACIONES_LISTA_SERV_BLOCK</li>
+	<li>COTIZACIONES_INDICE_DNI_PATH</li>
+	<li>COTIZACIONES_ARBM_DNI_ORDEN</li>
+	<li>COTIZACIONES_LISTA_DNI</li>
+	<li>COTIZACIONES_LISTA_DNI_BAJA</li>
+	<li>COTIZACIONES_LISTA_DNI_BLOCK</li>
+	<li>SYSTEM_PASS</li>
 </ul>
+<p>La configuraci&oacute;n del cifrador, es decir la elecci&oacute;n del vocabulario usado se hace sobre el archivo <i>cifrador_hill.c</i>
 
 </article>
 <article id="fisica">
@@ -409,6 +421,8 @@ Usuario creado Satisfactoriamente
 	<li><strong>Cotizaciones_end:</strong> Finaliza uso de consultas</li>
 	<li><strong>Cotizacion_new:</strong> Crea una nueva cotizaci&oacute;n</li>
 	<li><strong>Cotizacion_from_id:</strong> Trae una cotizaci&oacute;n buscandola desde la id.</li>
+	<li><strong>Cotizacion_from_id_serv:</strong> Obtiene cotizaciones desde id servicio.</li>
+	<li><strong>Cotizacion_from_id_usu:</strong> Obtiene cotizaciones desde id usuario.</li>
 	<li><strong>Cotizacion_del:</strong>  Borra cotizaci&oacute;n.</li>
 	<li><strong>Getters para los datos de la cotizaci&oacute;n</strong></li>
 	<li><strong>Cotizacion_free:</strong> Libera memroia para la entidad cotizaci&oacute;n</li>
@@ -444,6 +458,22 @@ Usuario creado Satisfactoriamente
 	<li><strong>Usuario_free:</strong> Libera memoria para la entidad usuario.</li>
 </ul>
 
+<div class="nota">
+	<p>Todos los archivos cabecera (.h) de las entidades descriptas anteriormente, se encuentran comentados siguiendo las reglas Doxygen. Para tener mas informaci&oacute;n respecto a los par&acute;metros y funcionamiento de estas, por favor, leer los <i>.h</i>.</p>
+</div>
+</article>
+
+<article id="hill">
+<span class="titulo">Encriptaci&oacute;n (cifrador_hill.h)</span>
+<p>Se implmentent&oacute; el cifrador mediante el uso de una serie de fuciones, para proveer una interfaz simple.</p>
+<p>Las funciones que se implementaron son las siguientes</p>
+<ul>
+	<li><strong>normalizar:</strong> Normaliza el texto, pasa caracteres a mayusculas y elimina caracteres fuera del vocabulario.</li>
+	<li><strong>decrypt:</strong> Des encripta.</li>
+	<li><strong>encrypt:</strong> Encripta</li>
+	<li><strong>validar_clave:</strong> Valida que una clave sea valida, es decir que sea una matriz inversible.</li>
+
+</ul>
 <div class="nota">
 	<p>Todos los archivos cabecera (.h) de las entidades descriptas anteriormente, se encuentran comentados siguiendo las reglas Doxygen. Para tener mas informaci&oacute;n respecto a los par&acute;metros y funcionamiento de estas, por favor, leer los <i>.h</i>.</p>
 </div>
