@@ -73,4 +73,6 @@
 #define CONSULTAS_INDICE_USU_PATH "./con_arbm_usu.dat"
 #define CONSULTAS_ARBM_USU_ORDEN (64)
 
+#define SYSTEM_PASS "ABCDEABCD"
+
 #endif

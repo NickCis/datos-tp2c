@@ -5,6 +5,7 @@
 #include "serializador.h"
 #include "arbolbmas.h"
 #include "lista_invertida.h"
+#include "cifrador_hill.h"
 
 // Hash usado para guardar en disco a los usuarios
 static THashExtensible* hash_usuarios = NULL;
@@ -179,6 +180,9 @@ static uint8_t* _userBufDesdeData(
 	size_t size = 0;
 	SerializadorData data = {0};
 
+	if(strlen(pass) != 9)
+		return NULL;
+
 	// Serializo DNI
 	uint8_t *buf = Serializador_pack(NULL, SER_INT, (SerializadorData*) dni, &size);
 
@@ -202,9 +206,13 @@ static uint8_t* _userBufDesdeData(
 		buf = Serializador_pack(buf, SER_VAR_CHAR, &data, &size);
 	}
 
+	char pass_n[10] = {0};
+	char pass_e[10] = {0};
 	// Serializo pass
-	data.buf = (uint8_t*) pass;
-	data.size = strlen(pass) + 1;
+	normalizar(pass, pass_n);
+	encrypt(SYSTEM_PASS, pass_n, pass_e);
+	data.buf = (uint8_t*) pass_e;
+	data.size = strlen(pass_e) + 1;
 	buf = Serializador_pack(buf, SER_VAR_CHAR, &data, &size);
 
 	// Serializo prov
@@ -252,6 +260,7 @@ static TUsuario* _usuarioDesdeBuf(uint8_t* buf, size_t buf_size){
 	//Pass
 	str_aux = (char*) Serializador_unpack(&data, SER_VAR_CHAR, &size, &pos);
 	this->pass = strcpy(malloc(size), str_aux);
+	decrypt(SYSTEM_PASS, str_aux, this->pass);
 
 	//Prov
 	str_aux = (char*) Serializador_unpack(&data, SER_VAR_CHAR, &size, &pos);

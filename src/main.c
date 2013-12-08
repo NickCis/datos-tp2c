@@ -7,6 +7,7 @@
 #include "cotizaciones.h"
 #include "categorias.h"
 #include <time.h>
+#include "cifrador_hill.h"
 
 /** Menu para conectarse al sistema  */
 void conectarse();
@@ -87,6 +88,7 @@ int main(int argc, char* argv[]){
 void conectarse(){
 	unsigned int dni = 0;
 	char pass[33] = {0};
+	char pass_n[33] = {0};
 	printf("Ingrese dni:\n");
 	if( !(dni = get_dni())){
 		printf("Dni invalido\n");
@@ -102,7 +104,8 @@ void conectarse(){
 		return;
 	}
 
-	if(strcmp(pass, Usuario_get_password(user))){
+	normalizar(pass, pass_n);
+	if(strcmp(pass_n, Usuario_get_password(user))){
 		Usuario_free(user);
 		printf("Contrase~na incorrecta!\n");
 		return;
@@ -139,7 +142,8 @@ void crear_usuario(char t_u){
 		mail2,
 		mail3
 	};
-	char pass[33];
+	char pass[33] = {0};
+	char pass_n[33] = {0};
 	char prov[101];
 	//char t_u = 'u';
 	printf("Crear un nuevo usuario\n");
@@ -163,8 +167,10 @@ void crear_usuario(char t_u){
 		read_str(mails[i], 300);
 	}
 
-	printf("Ingrese contrase~na:\n");
-	read_str(pass, 32);
+	do {
+		printf("Ingrese contrase~na: (9 caracteres, mayusculas, numeros, _,.?-)\n");
+		read_str(pass, 32);
+	}while(validar_clave(pass));
 
 	printf("Ingrese provincia:\n");
 	read_str(prov, 100);
@@ -177,7 +183,8 @@ void crear_usuario(char t_u){
 	for (i=0; i < c_mail ; i++){
 		printf("\t* Mail %d: '%s'\n", i+1, mails[i]);
 	}
-	printf("\t* Contrase~na: '%s'\n", pass);
+	normalizar(pass, pass_n);
+	printf("\t* Contrase~na: '%s'\n", pass_n);
 	printf("\t* Provincia: '%s'\n", prov);
 	printf("Esta seguro?(s/n)\n");
 	if(read_opt() != 's'){

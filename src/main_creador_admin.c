@@ -2,6 +2,7 @@
 #include <string.h>
 #include "stdin_io.h"
 #include "usuarios.h"
+#include "cifrador_hill.h"
 
 int main(int argc, char* argv[]){
 	Usuarios_init();
@@ -17,7 +18,8 @@ int main(int argc, char* argv[]){
 		mail2,
 		mail3
 	};
-	char pass[33];
+	char pass[33] = {0};
+	char pass_n[33] = {0};
 	char prov[101];
 	char t_u = 's';
 	printf("Crear administrador del sistema\n");
@@ -41,8 +43,10 @@ int main(int argc, char* argv[]){
 		read_str(mails[i], 300);
 	}
 
-	printf("Ingrese contrase~na:\n");
-	read_str(pass, 32);
+	do {
+		printf("Ingrese contrase~na: (9 caracteres, mayusculas, numeros, _,.?-)\n");
+		read_str(pass, 32);
+	}while(validar_clave(pass));
 
 	printf("Ingrese provincia:\n");
 	read_str(prov, 100);
@@ -55,7 +59,8 @@ int main(int argc, char* argv[]){
 	for (i=0; i < c_mail ; i++){
 		printf("\t* Mail %d: '%s'\n", i+1, mails[i]);
 	}
-	printf("\t* Contrase~na: '%s'\n", pass);
+	normalizar(pass, pass_n);
+	printf("\t* Contrase~na: '%s'\n", pass_n);
 	printf("\t* Provincia: '%s'\n", prov);
 	printf("Esta seguro?(s/n)\n");
 	if(read_opt() != 's'){
